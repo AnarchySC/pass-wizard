@@ -9,7 +9,7 @@
   "tabs": {
     "course": true,
     "quiz": true,
-    "skillTree": false,
+    "skillTree": true,
     "companion": false,
     "progress": true
   },

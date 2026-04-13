@@ -63,7 +63,7 @@ function renderTabContent() {
     case 'progress':
       return renderProgress(main);
     case 'skillTree':
-      return renderComingSoon(main, 'Skill Tree', 'Gamified progression map — coming soon.');
+      return renderSkillTree(main);
     case 'companion':
       return renderComingSoon(main, 'Companion', 'Interactive story-driven walkthroughs — coming soon.');
     default:
@@ -107,6 +107,13 @@ function renderQuiz(main, subPath) {
   }
   // Hand off the container to the quiz engine. It owns rendering from here.
   PWQuiz.mount({ exam: examMeta, container: main });
+}
+
+function renderSkillTree(main) {
+  if (!examMeta.tabs.skillTree) {
+    return renderComingSoon(main, 'Skill Tree', 'No skill tree authored for this exam yet.');
+  }
+  PWSkillTree.mount({ exam: examMeta, container: main });
 }
 
 function renderProgress(main) {
