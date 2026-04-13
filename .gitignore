@@ -1,0 +1,19 @@
+# Editor / OS
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.vscode/
+.idea/
+
+# Build / runtime scratch
+node_modules/
+dist/
+.cache/
+
+# Local dev server logs
+*.log
+
+# Never commit the full unsplit bank
+quiz-data.json.full
+quiz-data-compact.js

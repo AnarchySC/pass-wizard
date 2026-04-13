@@ -1,0 +1,22 @@
+{
+  "code": "PSM-I",
+  "slug": "psm-i",
+  "name": "Professional Scrum Master I",
+  "vendor": "Scrum.org",
+  "passThreshold": 85,
+  "sessionSize": 25,
+  "questionCount": 239,
+  "tabs": {
+    "course": false,
+    "quiz": true,
+    "skillTree": false,
+    "companion": false,
+    "progress": true
+  },
+  "domains": {
+    "Scrum Roles": "scrum master|product owner|development team|stakeholder|self.?organiz",
+    "Events": "sprint planning|daily scrum|sprint review|retrospective|sprint\\b|timebox",
+    "Artifacts": "product backlog|sprint backlog|increment|definition of done|backlog item|transparency|burn",
+    "Scrum Values": "commitment|courage|focus|openness|respect|empiric|inspect|adapt|pillar"
+  }
+}

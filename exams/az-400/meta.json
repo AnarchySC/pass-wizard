@@ -1,0 +1,24 @@
+{
+  "code": "AZ-400",
+  "slug": "az-400",
+  "name": "DevOps Engineer",
+  "vendor": "Microsoft",
+  "passThreshold": 70,
+  "sessionSize": 25,
+  "questionCount": 336,
+  "tabs": {
+    "course": false,
+    "quiz": true,
+    "skillTree": false,
+    "companion": false,
+    "progress": true
+  },
+  "domains": {
+    "Source Control": "repo|branch|git\\b|pull request|merge|fork|version control|azure repos|github|code review",
+    "Build & Release Pipelines": "pipeline|yaml|build|release|deploy|ci.?cd|artifact|trigger|gate|approval|agent|stage|job|task|retention|blue.?green|canary|rolling",
+    "Package Management": "package|feed|nuget|npm|artifact|maven|upstream",
+    "Security & Compliance": "key vault|secret|scan|compliance|credential|sonarqube|owasp|whitesource|secure|vulnerability",
+    "Monitoring & Feedback": "application insights|monitor|telemetry|instrumentation|app center|crash|analytics|feedback",
+    "IaC & Configuration": "arm template|terraform|bicep|desired state|dsc|automation|ansible|chef|puppet|infrastructure as code"
+  }
+}

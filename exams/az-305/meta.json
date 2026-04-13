@@ -1,0 +1,22 @@
+{
+  "code": "AZ-305",
+  "slug": "az-305",
+  "name": "Solutions Architect",
+  "vendor": "Microsoft",
+  "passThreshold": 70,
+  "sessionSize": 25,
+  "questionCount": 221,
+  "tabs": {
+    "course": false,
+    "quiz": true,
+    "skillTree": false,
+    "companion": false,
+    "progress": true
+  },
+  "domains": {
+    "Identity & Governance": "identity|governance|azure ad|entra|rbac|policy|management group|conditional|b2b|b2c|hybrid identity|ad connect",
+    "Data Storage": "storage|sql|cosmos|data lake|database|blob|table|redis|cache|data factory|synapse|data box",
+    "Business Continuity": "backup|disaster|recovery|site recovery|availability|sla|failover|geo.?redundant|replication|business continuity",
+    "Infrastructure": "compute|network|migration|app service|aks|kubernetes|container|function|logic app|api management|cdn|front door|hub.?spoke|expressroute|vpn"
+  }
+}

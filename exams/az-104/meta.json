@@ -1,0 +1,23 @@
+{
+  "code": "AZ-104",
+  "slug": "az-104",
+  "name": "Azure Administrator",
+  "vendor": "Microsoft",
+  "passThreshold": 70,
+  "sessionSize": 25,
+  "questionCount": 497,
+  "tabs": {
+    "course": true,
+    "quiz": true,
+    "skillTree": false,
+    "companion": false,
+    "progress": true
+  },
+  "domains": {
+    "Identity & Governance": "azure ad|entra|rbac|role.?based|policy|management group|subscription|conditional access|mfa|multi.?factor|tenant|administrative unit|identity|privileged|access review",
+    "Storage": "storage account|blob|file share|table storage|queue storage|access tier|replication|sas token|data lake|azure files|azcopy|import.?export|cool|hot|archive",
+    "Compute": "virtual machine|vm\\b|scale set|app service|container|availability set|availability zone|automation|runbook|azure function|web app|aci |acr ",
+    "Networking": "vnet|virtual network|subnet|nsg|network security|load balancer|application gateway|vpn|expressroute|dns|firewall|peering|traffic manager|front door|bastion|network watcher|private endpoint|service endpoint",
+    "Monitoring": "monitor|log analytics|alert|diagnostic|application insights|action group|metric|advisor|service health|backup|recovery|site recovery"
+  }
+}
