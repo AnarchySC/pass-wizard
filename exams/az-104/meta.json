@@ -13,6 +13,19 @@
     "companion": false,
     "progress": true
   },
+  "courseModules": [
+    { "id": "01-identity",       "num": "01", "title": "Administer Identity",                  "file": "course/modules/01-identity.html" },
+    { "id": "02-governance",     "num": "02", "title": "Administer Governance & Compliance",   "file": "course/modules/02-governance.html" },
+    { "id": "03-resources",      "num": "03", "title": "Administer Azure Resources",           "file": "course/modules/03-resources.html" },
+    { "id": "04-networking",     "num": "04", "title": "Implement Virtual Networking",         "file": "course/modules/04-networking.html" },
+    { "id": "05-connectivity",   "num": "05", "title": "Administer Intersite Connectivity",    "file": "course/modules/05-connectivity.html" },
+    { "id": "06-traffic",        "num": "06", "title": "Administer Network Traffic Management","file": "course/modules/06-traffic.html" },
+    { "id": "07-storage",        "num": "07", "title": "Administer Azure Storage",             "file": "course/modules/07-storage.html" },
+    { "id": "08-vms",            "num": "08", "title": "Administer Virtual Machines",          "file": "course/modules/08-vms.html" },
+    { "id": "09-paas",           "num": "09", "title": "Administer PaaS Compute Options",      "file": "course/modules/09-paas.html" },
+    { "id": "10-data-protection","num": "10", "title": "Administer Data Protection",           "file": "course/modules/10-data-protection.html" },
+    { "id": "11-monitoring",     "num": "11", "title": "Administer Monitoring",                "file": "course/modules/11-monitoring.html" }
+  ],
   "domains": {
     "Identity & Governance": "azure ad|entra|rbac|role.?based|policy|management group|subscription|conditional access|mfa|multi.?factor|tenant|administrative unit|identity|privileged|access review",
     "Storage": "storage account|blob|file share|table storage|queue storage|access tier|replication|sas token|data lake|azure files|azcopy|import.?export|cool|hot|archive",

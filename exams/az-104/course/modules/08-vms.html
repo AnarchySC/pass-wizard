@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 08: Administer Virtual Machines | AZ-104</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%230078d4'/><text x='50' y='68' font-size='50' text-anchor='middle' fill='white' font-weight='bold'>Az</text></svg>">
+</head>
+<body data-module="m08">
+<div style="background:#0a0e1a;border-bottom:1px solid #1e293b;padding:10px 24px;font-size:0.85rem;font-family:system-ui,-apple-system,sans-serif;"><a href="../../index.html#course" style="color:#64748b;text-decoration:none;">&larr; Back to Pass Wizard AZ-104 hub</a></div>
+
+
+  <nav class="navbar">
+    <a href="../index.html" class="nav-brand">
+      <div class="logo">Az</div>
+      <span>AZ-104 Course</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html#modules">Modules</a></li>
+      <li><a href="https://microsoftlearning.github.io/AZ-104-MicrosoftAzureAdministrator/" target="_blank">Official Labs</a></li>
+    </ul>
+  </nav>
+
+  <div class="module-page">
+
+    <section class="module-hero">
+      <div class="module-hero-content">
+        <div class="breadcrumb">
+          <a href="../index.html">AZ-104</a>
+          <span>/</span>
+          <span>Module 08</span>
+        </div>
+        <h1>Administer Virtual Machines</h1>
+        <p class="module-subtitle">Deploy zone-resilient VMs, manage scaling, configure VM Scale Sets, and automate provisioning with PowerShell and CLI.</p>
+        <div class="meta-bar">
+          <div class="meta-item">
+            <span class="icon">&#9776;</span>
+            <span>Lab 08</span>
+          </div>
+          <div class="meta-item">
+            <span class="icon">&#9654;</span>
+            <span>Demo</span>
+          </div>
+          <div class="meta-item">
+            <span class="icon">&#9998;</span>
+            <span>3 Exercises</span>
+          </div>
+          <div class="meta-item">
+            <span class="icon">&#9200;</span>
+            <span>50 min</span>
+          </div>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar" style="width: 0%"></div>
+        </div>
+        <span class="progress-label" style="font-size:0.8rem; color:var(--text-muted); margin-top:6px; display:inline-block;">0/6 completed</span>
+      </div>
+    </section>
+
+    <div class="module-content">
+      <div class="tab-container">
+        <div class="tab-nav">
+          <button class="tab-btn active" data-tab="tab-lesson">Lesson</button>
+          <button class="tab-btn" data-tab="tab-lab">Lab</button>
+          <button class="tab-btn" data-tab="tab-demo">Demo</button>
+          <button class="tab-btn" data-tab="tab-exercises">Exercises</button>
+          <button class="tab-btn" data-tab="tab-prove">Prove It</button>
+        </div>
+
+        <!-- ==================== LESSON TAB ==================== -->
+        <div id="tab-lesson" class="tab-content active">
+
+          <div class="lesson-intro">
+            <h2>What You'll Learn</h2>
+            <p>Virtual machines are the workhorse of Azure compute. This module covers creating VMs, scaling them (up and out), managing disks, and using VM Scale Sets for automated scaling.</p>
+            <ul class="lesson-objectives">
+              <li>Deploy VMs across availability zones for high availability</li>
+              <li>Scale VMs vertically (resize) and horizontally (more instances)</li>
+              <li>Manage and change VM disks</li>
+              <li>Configure VM Scale Sets with autoscale rules</li>
+            </ul>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#128421;</span>
+              <h3>VM Fundamentals</h3>
+            </div>
+            <div class="concept-body">
+              <p>When you create a VM, you choose four things:</p>
+              <ol>
+                <li><strong>Image</strong> &mdash; The operating system (Windows Server, Ubuntu, etc.)</li>
+                <li><strong>Size</strong> &mdash; CPU, RAM, disk speed (B-series burstable, D-series general, E-series memory-optimized)</li>
+                <li><strong>Region</strong> &mdash; Where the VM physically runs</li>
+                <li><strong>Networking</strong> &mdash; VNet, subnet, public IP, NSG</li>
+              </ol>
+              <p>A VM creates several sub-resources: a NIC (network interface), an OS disk, and optionally a public IP. These are separate resources that can be managed independently.</p>
+              <div class="info-box note">
+                <strong>Note:</strong> VM sizes determine your SLA, performance, and cost. B-series VMs are the cheapest but have variable CPU performance (they 'burst'). For production workloads, use D-series or higher.
+              </div>
+            </div>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#9989;</span>
+              <h3>Availability and SLA</h3>
+            </div>
+            <div class="concept-body">
+              <p>Azure guarantees different SLA levels depending on your architecture:</p>
+              <table class="compare-table">
+                <thead>
+                  <tr><th>Architecture</th><th>SLA</th><th>What it means</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Single VM (Premium SSD)</td><td>99.9%</td><td>Up to 8.76 hours downtime/year</td></tr>
+                  <tr><td>Availability Set</td><td>99.95%</td><td>Up to 4.38 hours downtime/year</td></tr>
+                  <tr><td>Availability Zones</td><td>99.99%</td><td>Up to 52.6 minutes downtime/year</td></tr>
+                </tbody>
+              </table>
+              <p><strong>Availability Set</strong> &mdash; VMs spread across fault domains (separate physical racks) and update domains (separate maintenance groups) within ONE datacenter.</p>
+              <p><strong>Availability Zones</strong> &mdash; VMs spread across physically separate datacenters within a region. Each zone has independent power, cooling, and networking.</p>
+              <div class="real-world">
+                <strong>Real-World:</strong> If your app needs high availability, deploy at least 2 VMs across Availability Zones with a Load Balancer. This gives you 99.99% SLA and protects against entire datacenter failures.
+              </div>
+            </div>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#128200;</span>
+              <h3>Scaling</h3>
+            </div>
+            <div class="concept-body">
+              <p>Two types of scaling:</p>
+              <p><strong>Vertical scaling (scale up/down)</strong> &mdash; Change the VM size. More CPU, more RAM. Requires a restart. Good for predictable, steady growth.</p>
+              <p><strong>Horizontal scaling (scale out/in)</strong> &mdash; Add or remove VM instances. No downtime for existing VMs. Good for variable workloads.</p>
+            </div>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#128736;</span>
+              <h3>VM Scale Sets</h3>
+            </div>
+            <div class="concept-body">
+              <p>A <strong>VM Scale Set</strong> (VMSS) is a group of identical VMs managed as a unit. Instead of creating VMs one by one, you define a template and Azure handles the rest.</p>
+              <p>Key features:</p>
+              <ul>
+                <li><strong>Autoscale</strong> &mdash; Automatically add/remove instances based on metrics (CPU, memory, queue length)</li>
+                <li><strong>Rolling upgrades</strong> &mdash; Update VMs without downtime</li>
+                <li><strong>Zone spanning</strong> &mdash; Spread instances across availability zones</li>
+              </ul>
+              <p>Autoscale rules have two parts:</p>
+              <ul>
+                <li><strong>Scale-out rule</strong>: When CPU &gt; 70% for 10 minutes &rarr; add 50% more instances</li>
+                <li><strong>Scale-in rule</strong>: When CPU &lt; 30% for 10 minutes &rarr; remove 50% of instances</li>
+                <li><strong>Cooldown period</strong>: Wait 5 minutes after scaling before evaluating again (prevents thrashing)</li>
+              </ul>
+              <div class="info-box warning">
+                <strong>Warning:</strong> Always configure BOTH scale-out AND scale-in rules. If you only configure scale-out, instances are added during load spikes but never removed &mdash; you'll pay for idle VMs forever.
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================== LAB TAB ==================== -->
+        <div id="tab-lab" class="tab-content">
+
+          <h2 style="margin-bottom: 8px;">Lab 08 &mdash; Manage Virtual Machines</h2>
+          <p style="color: var(--text-muted); margin-bottom: 32px;">Estimated time: 50 minutes</p>
+
+          <!-- Task 1 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t1">
+              <span class="task-number">1</span>
+              <h3>Deploy Zone-Resilient VMs</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Create two virtual machines deployed across availability zones for high availability.</p>
+
+              <ol class="steps">
+                <li>Navigate to <strong>Virtual Machines</strong> and click <strong>+ Create</strong> &rarr; <strong>Azure virtual machine</strong>.</li>
+                <li>Configure the first VM:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Resource Group</td><td>az104-rg8 (create new)</td></tr>
+                    <tr><td>Name</td><td>az104-vm1</td></tr>
+                    <tr><td>Availability Zone</td><td>Zone 1</td></tr>
+                    <tr><td>Image</td><td>Windows Server 2025</td></tr>
+                    <tr><td>Size</td><td>Standard_D2s_v3</td></tr>
+                  </table>
+                </li>
+                <li>On the <strong>Disks</strong> tab:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>OS disk type</td><td>Premium SSD</td></tr>
+                    <tr><td>Delete with VM</td><td>Checked</td></tr>
+                  </table>
+                </li>
+                <li>On the <strong>Networking</strong> tab, set <strong>Public inbound ports</strong> to <strong>None</strong>.</li>
+                <li>On the <strong>Management</strong> tab, disable <strong>Boot diagnostics</strong>.</li>
+                <li>Click <strong>Review + create</strong>, then <strong>Create</strong>.</li>
+                <li>Repeat to create <strong>az104-vm2</strong> with the same settings but in <strong>Availability Zone 2</strong>.</li>
+              </ol>
+
+              <div class="info-box note">
+                <strong>Note</strong>
+                Deploying VMs across availability zones provides 99.99% uptime SLA. Each zone is a separate physical datacenter within the same Azure region.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 2 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t2">
+              <span class="task-number">2</span>
+              <h3>Manage Compute and Storage Scaling</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Resize a VM and manage data disks including attaching, detaching, and upgrading.</p>
+
+              <ol class="steps">
+                <li>Navigate to <strong>az104-vm1</strong> &rarr; <strong>Size</strong> blade.</li>
+                <li>Resize the VM to <strong>Standard_D2ds_v4</strong> and click <strong>Resize</strong>.</li>
+                <li>Navigate to the <strong>Disks</strong> blade and click <strong>+ Create and attach a new disk</strong>:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Disk name</td><td>vm1-disk1</td></tr>
+                    <tr><td>Size</td><td>32 GB</td></tr>
+                    <tr><td>Storage type</td><td>Standard HDD</td></tr>
+                  </table>
+                </li>
+                <li>Click <strong>Apply</strong> to attach the disk.</li>
+                <li>Return to the <strong>Disks</strong> blade and <strong>detach</strong> vm1-disk1 by clicking the X icon, then <strong>Apply</strong>.</li>
+                <li>Search for the <strong>vm1-disk1</strong> disk resource, open it, and navigate to <strong>Size + performance</strong>.</li>
+                <li>Upgrade the storage type to <strong>Standard SSD</strong> and click <strong>Save</strong>.</li>
+                <li>Return to <strong>az104-vm1</strong> &rarr; <strong>Disks</strong> and re-attach the upgraded disk.</li>
+              </ol>
+
+              <div class="info-box tip">
+                <strong>Tip</strong>
+                You can change a disk's SKU (HDD, SSD, Premium SSD) only while it is unattached. Detach first, upgrade, then re-attach.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 3 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t3">
+              <span class="task-number">3</span>
+              <h3>Create VM Scale Set</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Deploy a VM Scale Set with load balancing and a network security group.</p>
+
+              <ol class="steps">
+                <li>Navigate to <strong>Virtual machine scale sets</strong> and click <strong>+ Create</strong>.</li>
+                <li>Configure the basics:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Resource Group</td><td>az104-rg8</td></tr>
+                    <tr><td>Name</td><td>vmss1</td></tr>
+                    <tr><td>Availability Zones</td><td>Zones 1, 2, 3</td></tr>
+                    <tr><td>Orchestration mode</td><td>Uniform</td></tr>
+                    <tr><td>Image</td><td>Windows Server 2025</td></tr>
+                    <tr><td>Size</td><td>Standard_D2s_v3</td></tr>
+                  </table>
+                </li>
+                <li>On the <strong>Networking</strong> tab, configure the virtual network:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Virtual network</td><td>vmss-vnet (create new)</td></tr>
+                    <tr><td>Address range</td><td>10.82.0.0/20</td></tr>
+                    <tr><td>Subnet name</td><td>subnet0</td></tr>
+                    <tr><td>Subnet range</td><td>10.82.0.0/24</td></tr>
+                  </table>
+                </li>
+                <li>Edit the network interface to create a new NSG named <strong>vmss1-nsg</strong>.</li>
+                <li>Add an inbound rule to the NSG:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Name</td><td>AllowHTTP</td></tr>
+                    <tr><td>Destination port</td><td>80</td></tr>
+                    <tr><td>Protocol</td><td>TCP</td></tr>
+                    <tr><td>Action</td><td>Allow</td></tr>
+                    <tr><td>Priority</td><td>1010</td></tr>
+                  </table>
+                </li>
+                <li>Under <strong>Load balancing</strong>, select <strong>Azure load balancer</strong> and create a new one named <strong>vmss-lb</strong>.</li>
+                <li>Click <strong>Review + create</strong>, then <strong>Create</strong>.</li>
+              </ol>
+
+              <div class="info-box note">
+                <strong>Note</strong>
+                Uniform orchestration treats all instances identically &mdash; ideal for stateless workloads. Flexible orchestration allows mixing VM sizes and is better for heterogeneous workloads.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 4 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t4">
+              <span class="task-number">4</span>
+              <h3>Scale VM Scale Sets</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Configure custom autoscale rules based on CPU metrics.</p>
+
+              <ol class="steps">
+                <li>Navigate to <strong>vmss1</strong> &rarr; <strong>Scaling</strong> blade.</li>
+                <li>Select <strong>Custom autoscale</strong>.</li>
+                <li>Set the <strong>Scale mode</strong> to <strong>Scale based on a metric</strong>.</li>
+                <li>Add a <strong>scale-out</strong> rule:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Metric</td><td>Percentage CPU</td></tr>
+                    <tr><td>Operator</td><td>Greater than</td></tr>
+                    <tr><td>Threshold</td><td>70%</td></tr>
+                    <tr><td>Duration</td><td>10 minutes</td></tr>
+                    <tr><td>Operation</td><td>Increase percent by</td></tr>
+                    <tr><td>Value</td><td>50%</td></tr>
+                  </table>
+                </li>
+                <li>Add a <strong>scale-in</strong> rule:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Metric</td><td>Percentage CPU</td></tr>
+                    <tr><td>Operator</td><td>Less than</td></tr>
+                    <tr><td>Threshold</td><td>30%</td></tr>
+                    <tr><td>Duration</td><td>10 minutes</td></tr>
+                    <tr><td>Operation</td><td>Decrease percent by</td></tr>
+                    <tr><td>Value</td><td>50%</td></tr>
+                  </table>
+                </li>
+                <li>Set the <strong>instance limits</strong>:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Minimum</td><td>2</td></tr>
+                    <tr><td>Maximum</td><td>10</td></tr>
+                    <tr><td>Default</td><td>2</td></tr>
+                  </table>
+                </li>
+                <li>Click <strong>Save</strong>.</li>
+              </ol>
+
+              <div class="info-box tip">
+                <strong>Tip</strong>
+                Always configure both scale-out and scale-in rules. Without a scale-in rule, you may end up paying for idle instances that never get removed.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 5 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t5">
+              <span class="task-number">5</span>
+              <h3>Create VM with PowerShell (Optional)</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Use Azure PowerShell to create a virtual machine from the command line.</p>
+
+              <ol class="steps">
+                <li>Open <strong>Azure Cloud Shell</strong> and select <strong>PowerShell</strong>.</li>
+                <li>Run the following command to create a VM:
+                  <div class="code-block">
+                    <span class="lang-tag">PowerShell</span>
+                    New-AzVm -ResourceGroupName 'az104-rg8' -Name 'myPSVM' -Location 'East US' -Image 'Win2019Datacenter' -Zone '1' -Size 'Standard_D2s_v3'
+                  </div>
+                </li>
+                <li>When prompted, enter a username and password for the VM admin account.</li>
+                <li>Once deployment completes, verify the VM appears in the <strong>az104-rg8</strong> resource group.</li>
+              </ol>
+
+              <div class="info-box note">
+                <strong>Note</strong>
+                PowerShell is ideal for scripted or repeatable deployments. The <code>New-AzVm</code> cmdlet creates a VM along with all required resources (NIC, disk, NSG) automatically.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 6 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t6">
+              <span class="task-number">6</span>
+              <h3>Create VM with CLI (Optional)</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Use Azure CLI to create a Linux virtual machine.</p>
+
+              <ol class="steps">
+                <li>Open <strong>Azure Cloud Shell</strong> and select <strong>Bash</strong>.</li>
+                <li>Run the following command to create a VM:
+                  <div class="code-block">
+                    <span class="lang-tag">CLI</span>
+                    az vm create --name myCLIVM --resource-group az104-rg8 --image Ubuntu2204 --admin-username localadmin --generate-ssh-keys
+                  </div>
+                </li>
+                <li>Wait for the deployment to complete. The output will include the public IP address.</li>
+                <li>Verify the VM appears in the <strong>az104-rg8</strong> resource group.</li>
+              </ol>
+
+              <div class="info-box tip">
+                <strong>Tip</strong>
+                The <code>--generate-ssh-keys</code> flag automatically creates an SSH key pair if one doesn't exist. The private key is stored in <code>~/.ssh/</code> in your Cloud Shell session.
+              </div>
+            </div>
+          </div>
+
+          <!-- Key Takeaways -->
+          <div class="takeaways">
+            <h3>Key Takeaways</h3>
+            <ul>
+              <li>Virtual machines provide on-demand, scalable computing resources in Azure.</li>
+              <li>Both vertical scaling (resizing VM size) and horizontal scaling (adding instances) are available.</li>
+              <li>VM Scale Sets enable load-balanced group management with autoscale rules.</li>
+              <li>Availability zones support 99.99% uptime SLA by distributing VMs across physical datacenters.</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <!-- ==================== DEMO TAB ==================== -->
+        <div id="tab-demo" class="tab-content">
+
+          <h2 style="margin-bottom: 32px;">Demonstrations</h2>
+
+          <div class="task-block">
+            <div class="task-header">
+              <span class="task-number">1</span>
+              <h3>VM Creation in Portal (Windows/Linux)</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Walk through creating virtual machines in the Azure Portal, demonstrating:</p>
+              <ol class="steps">
+                <li>Choosing between Windows Server and Linux (Ubuntu) images.</li>
+                <li>Selecting a VM size based on workload requirements (B-series vs D-series).</li>
+                <li>Configuring authentication &mdash; password for Windows, SSH key for Linux.</li>
+                <li>Reviewing disk options: OS disk type, data disks, delete-with-VM setting.</li>
+                <li>Networking defaults: auto-created VNet, subnet, NSG, and public IP.</li>
+                <li>Management options: boot diagnostics, auto-shutdown, backup.</li>
+              </ol>
+              <div class="info-box tip">
+                <strong>Tip</strong>
+                Use the <strong>See all sizes</strong> link to filter by family, vCPUs, RAM, and cost. Bookmark sizes you use frequently.
+              </div>
+            </div>
+          </div>
+
+          <div class="task-block">
+            <div class="task-header">
+              <span class="task-number">2</span>
+              <h3>Connection Methods: RDP, SSH, Bastion</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Demonstrate the three main ways to connect to a VM:</p>
+              <ol class="steps">
+                <li><strong>RDP</strong>: Download the RDP file from the VM's Connect blade. Requires port 3389 open in the NSG.</li>
+                <li><strong>SSH</strong>: Connect using <code>ssh adminuser@&lt;public-ip&gt;</code>. Requires port 22 open in the NSG.</li>
+                <li><strong>Bastion</strong>: Connect through the browser without a public IP. Requires AzureBastionSubnet in the VNet.</li>
+                <li>Compare security implications: Bastion eliminates the need for public IP exposure and open RDP/SSH ports.</li>
+              </ol>
+              <div class="info-box note">
+                <strong>Note</strong>
+                Azure Bastion provides secure RDP/SSH over TLS directly from the Azure Portal, without exposing VM ports to the public internet.
+              </div>
+            </div>
+          </div>
+
+          <div class="task-block">
+            <div class="task-header">
+              <span class="task-number">3</span>
+              <h3>VM Scale Sets: Uniform vs Flexible Orchestration</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Compare the two orchestration modes available for VM Scale Sets:</p>
+              <ol class="steps">
+                <li><strong>Uniform</strong>: All instances use the same VM model and image. Best for stateless, identical workloads (web servers, workers).</li>
+                <li><strong>Flexible</strong>: Mix different VM sizes and images. Best for heterogeneous workloads or when migrating from availability sets.</li>
+                <li>Show how to select orchestration mode during VMSS creation.</li>
+                <li>Demonstrate the <strong>Instances</strong> blade to view running instances and their status.</li>
+                <li>Show the <strong>Upgrade policy</strong> options: Automatic, Rolling, Manual.</li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="task-block">
+            <div class="task-header">
+              <span class="task-number">4</span>
+              <h3>Scaling Configuration: Manual and CPU-Based Autoscale</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Demonstrate both manual and automatic scaling options:</p>
+              <ol class="steps">
+                <li>Show <strong>manual scaling</strong>: change the instance count directly on the Scaling blade.</li>
+                <li>Switch to <strong>custom autoscale</strong> and walk through the rule builder.</li>
+                <li>Create a CPU-based scale-out rule: average CPU &gt; 70% for 10 min &rarr; add 1 instance.</li>
+                <li>Create a matching scale-in rule: average CPU &lt; 30% for 10 min &rarr; remove 1 instance.</li>
+                <li>Explain cooldown period and why it matters (prevents flapping).</li>
+                <li>Show the <strong>Run history</strong> tab to review past scaling events.</li>
+              </ol>
+              <div class="info-box tip">
+                <strong>Tip</strong>
+                Always set a cooldown period (default 5 minutes) to allow metrics to stabilize after a scaling event before triggering another.
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================== EXERCISES TAB ==================== -->
+        <div id="tab-exercises" class="tab-content">
+
+          <h2 style="margin-bottom: 32px;">Exercises</h2>
+
+          <!-- Exercise 1 -->
+          <div class="exercise-card">
+            <span class="difficulty easy">Easy</span>
+            <h4>Exercise 1: VM Size Comparison</h4>
+            <ol>
+              <li>When creating a VM, explore the <strong>Size</strong> picker using <strong>See all sizes</strong>.</li>
+              <li>Compare at least 3 VM families: <strong>B-series</strong> (burstable), <strong>D-series</strong> (general purpose), <strong>E-series</strong> (memory-optimized).</li>
+              <li>Document vCPUs, RAM, temp storage, and estimated cost for one size in each family.</li>
+              <li>Which family would you choose for a web server? A database? A dev/test environment?</li>
+            </ol>
+            <div class="hint">
+              <strong>Show Hint</strong>
+              <div class="hint-text">B-series is cheapest for dev/test (burstable CPU credits). D-series is the general-purpose workhorse for production web servers. E-series has a high memory-to-CPU ratio, making it ideal for databases and in-memory caching.</div>
+            </div>
+          </div>
+
+          <!-- Exercise 2 -->
+          <div class="exercise-card">
+            <span class="difficulty medium">Medium</span>
+            <h4>Exercise 2: Availability Architecture</h4>
+            <ol>
+              <li>Create a VM and note which availability zone it is deployed in.</li>
+              <li>Review the difference between: <strong>Availability Zones</strong>, <strong>Availability Sets</strong>, and <strong>VM Scale Sets</strong>.</li>
+              <li>Create a table comparing: fault domains, update domains, SLA, and use cases for each option.</li>
+              <li>If you need 99.99% SLA, which option do you choose and why?</li>
+              <li>What is the SLA for a single VM with Premium SSD?</li>
+            </ol>
+            <div class="hint">
+              <strong>Show Hint</strong>
+              <div class="hint-text">Single VM with Premium SSD = 99.9% SLA. Availability Set = 99.95% SLA (2+ VMs across fault/update domains). Availability Zones = 99.99% SLA (2+ VMs across physically separate datacenters). Choose Availability Zones for the highest SLA.</div>
+            </div>
+          </div>
+
+          <!-- Exercise 3 -->
+          <div class="exercise-card">
+            <span class="difficulty hard">Hard</span>
+            <h4>Exercise 3: Autoscale Simulation</h4>
+            <ol>
+              <li>Deploy a VM Scale Set with custom autoscale (CPU &gt; 70% = scale out).</li>
+              <li>SSH or RDP into an instance.</li>
+              <li>Generate CPU load (e.g., run a stress test or busy loop).</li>
+              <li>Monitor the scale set's <strong>Instances</strong> blade &mdash; watch for new instances appearing.</li>
+              <li>Stop the load and observe scale-in behavior.</li>
+              <li>Review the <strong>Activity Log</strong> for scaling events.</li>
+            </ol>
+            <div class="hint">
+              <strong>Show Hint</strong>
+              <div class="hint-text">On Linux, use <code>stress --cpu 4 --timeout 600</code> to generate CPU load. On Windows, use a PowerShell busy loop: <code>while($true){}</code>. Scaling may take 5&ndash;10 minutes to trigger due to metric aggregation and cooldown periods.</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================== PROVE IT TAB ==================== -->
+        <div id="tab-prove" class="tab-content">
+          <div class="prove-intro">
+            <h2>Prove You Know It</h2>
+            <p>Not memorization — understanding. Can you apply what you learned to real situations?</p>
+            <div class="score-display">Scenarios: <span class="quiz-score">No questions answered yet</span></div>
+          </div>
+
+          <div class="assess-section">
+            <div class="assess-section-title"><span class="assess-icon scenario">?</span> Quick Scenarios</div>
+
+            <div class="quiz-card" data-qid="q1" data-answer="C">
+              <div class="quiz-scenario">
+                <span class="scenario-label">Scenario</span>
+                <p>A single VM with a Premium SSD gives you 99.9% SLA. Your app needs 99.99%. What do you do?</p>
+              </div>
+              <div class="quiz-options">
+                <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>Upgrade to a larger VM size</span></div>
+                <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>Add a Premium SSD data disk</span></div>
+                <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>Deploy two VMs across Availability Zones with a Load Balancer</span></div>
+              </div>
+              <div class="quiz-explanation">
+                <div class="explanation-box why-right"><strong>Why this is correct</strong>99.99% SLA requires Availability Zones (VMs in separate physical datacenters within a region). VM size and disk type don't affect the SLA beyond the single-VM 99.9% for Premium SSD. Availability Sets give 99.95%. Only zones reach 99.99%.</div>
+                <div class="explanation-box why-wrong"><strong>Common mistakes</strong>VM size (A) affects performance, not availability SLA. Adding disks (B) affects storage capacity, not uptime guarantees. SLA is about redundancy architecture, not hardware specs.</div>
+              </div>
+            </div>
+
+            <div class="quiz-card" data-qid="q2" data-answer="B">
+              <div class="quiz-scenario">
+                <span class="scenario-label">Scenario</span>
+                <p>You resized a VM from D2s_v3 to D4s_v3 and it rebooted. Is this expected?</p>
+              </div>
+              <div class="quiz-options">
+                <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>No — resizing should happen without downtime</span></div>
+                <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>Yes — resizing a VM requires a restart to allocate new hardware</span></div>
+                <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>Only if you change VM families (e.g., D-series to E-series)</span></div>
+              </div>
+              <div class="quiz-explanation">
+                <div class="explanation-box why-right"><strong>Why this is correct</strong>All VM resize operations require a restart because Azure needs to move the VM to hardware that can support the new size. This applies even when staying in the same family. Plan for downtime or use scale sets for zero-downtime scaling.</div>
+                <div class="explanation-box why-wrong"><strong>Common mistakes</strong>There is no live resize for Azure VMs (A is wrong). The restart happens regardless of whether you stay in the same family or switch families (C is wrong).</div>
+              </div>
+            </div>
+
+            <div class="quiz-card" data-qid="q3" data-answer="A">
+              <div class="quiz-scenario">
+                <span class="scenario-label">Scenario</span>
+                <p>Your VM Scale Set has autoscale: scale out at CPU > 70% with a 5-minute cooldown. After a CPU spike, 3 new instances were added. But CPU is now at 30% across all instances. What happens next?</p>
+              </div>
+              <div class="quiz-options">
+                <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>Nothing immediately — the scale-in rule (if configured) will evaluate and eventually remove excess instances</span></div>
+                <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>The 3 new instances are immediately removed</span></div>
+                <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>The scale set keeps all instances forever until manually removed</span></div>
+              </div>
+              <div class="quiz-explanation">
+                <div class="explanation-box why-right"><strong>Why this is correct</strong>Scale-in is not automatic unless you've configured a scale-in rule. If you only configured scale-out, instances stay. If you have a scale-in rule (e.g., CPU &lt; 30% for 10 min), it will evaluate after the cooldown and gradually remove instances. Instances are never immediately removed — the cooldown and evaluation period protect against thrashing.</div>
+                <div class="explanation-box why-wrong"><strong>Common mistakes</strong>Instances are never immediately removed (B is wrong) — cooldown periods prevent this. Instances won't stay forever IF a scale-in rule exists (C is wrong), but they will if you forgot to configure one.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="assess-section">
+            <div class="assess-section-title"><span class="assess-icon troubleshoot">!</span> Troubleshooting Spot</div>
+
+            <div class="trouble-card">
+              <span class="trouble-label">Troubleshoot</span>
+              <p class="trouble-situation">You're trying to resize a VM to Standard_E4s_v3 but the size doesn't appear in the available sizes list. The VM is currently running in East US.</p>
+              <p class="trouble-question">What's wrong?</p>
+              <div class="progressive-hints">
+                <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Hint 1</div><div class="prog-hint-content">Not all VM sizes are available in every region. Check if E4s_v3 is supported in East US.</div></div>
+                <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Hint 2</div><div class="prog-hint-content">Even if the size exists in the region, the specific hardware cluster your VM is on might not support it.</div></div>
+                <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Answer</div><div class="prog-hint-content answer">When a VM is allocated to a hardware cluster, only sizes supported by that cluster appear. To access other sizes: deallocate the VM first (this releases it from the current cluster), then resize — you'll see the full list of sizes available in the region. If the size still doesn't appear, it's not available in that region at all.</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="assess-section">
+            <div class="assess-section-title"><span class="assess-icon architect">&#9670;</span> Architect's Corner</div>
+
+            <div class="architect-card" data-aid="a1" data-best="B">
+              <span class="architect-label">Design Decision</span>
+              <p class="architect-situation">You're deploying a web application that gets variable traffic — 100 users during business hours, 10,000 during flash sales (unpredictable). What compute strategy do you use?</p>
+              <div class="architect-options">
+                <div class="arch-option" data-value="A"><div class="arch-option-title">A single large VM that can handle peak load</div><div class="arch-option-desc">Always on, pays for max capacity 24/7</div></div>
+                <div class="arch-option" data-value="B"><div class="arch-option-title">A VM Scale Set with autoscale rules based on CPU and request count</div><div class="arch-option-desc">Scales out for demand, scales in to save cost</div></div>
+                <div class="arch-option" data-value="C"><div class="arch-option-title">A fixed pool of 20 VMs behind a load balancer</div><div class="arch-option-desc">Handles moderate spikes, consistent cost</div></div>
+              </div>
+              <div class="architect-reveal"><strong>Why this is the best choice</strong>VM Scale Sets with autoscale match your variable-traffic pattern perfectly. You pay for 2-3 instances during quiet periods and scale to 15+ during flash sales. Option A wastes money 90% of the time paying for capacity you don't need. Option C is better but still pays for 20 VMs during off-hours. Autoscale handles the unpredictability — configure scale-out on CPU > 70% AND custom metrics like HTTP request queue length for more responsive scaling.</div>
+            </div>
+          </div>
+
+          <button class="reset-quiz-btn">&#8635; Reset All Answers</button>
+        </div>
+
+      </div><!-- /tab-container -->
+
+      <nav class="module-nav">
+        <a href="07-storage.html" class="prev">
+          <span class="nav-direction">&larr; Previous Module</span>
+          <span class="nav-title">07: Azure Storage</span>
+        </a>
+        <a href="09-paas.html" class="next">
+          <span class="nav-direction">Next Module &rarr;</span>
+          <span class="nav-title">09: PaaS Compute Options</span>
+        </a>
+      </nav>
+
+    </div><!-- /module-content -->
+
+  </div><!-- /module-page -->
+
+  <footer class="site-footer">
+    <p>Built for the AZ-104 Azure Administrator certification. Lab content sourced from <a href="https://microsoftlearning.github.io/AZ-104-MicrosoftAzureAdministrator/" target="_blank">Microsoft Learning</a>.</p>
+  </footer>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

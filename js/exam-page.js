@@ -75,29 +75,38 @@ function renderCourse(main, moduleId) {
   if (!examMeta.tabs.course) {
     return renderComingSoon(main, 'Course', 'Course content is still being migrated for this exam.');
   }
+  const mods = examMeta.courseModules || [];
+  if (mods.length === 0) {
+    return renderComingSoon(main, 'Course', 'No modules registered in meta.json for this exam.');
+  }
+  const completed = pwLoad(examMeta.code).course.completed;
+  const cards = mods.map(m => {
+    const done = completed.includes(m.id) ? '<span style="color:var(--correct);font-size:0.7rem;">&#10003; DONE</span>' : '';
+    return `
+      <a class="exam-btn" href="${m.file}" style="text-align:left;">
+        <span class="code" style="font-size:0.9rem;">Module ${m.num}</span>
+        <span class="name" style="color:var(--text);font-size:1rem;margin-bottom:8px;">${m.title}</span>
+        ${done}
+      </a>
+    `;
+  }).join('');
   main.innerHTML = `
     <div class="card">
-      <h3>Modules</h3>
-      <p style="color:var(--text-dim);font-size:0.85rem;">
-        Course content migration pending. See <code>DECISIONS.md</code> for status.
+      <h3>Course Modules</h3>
+      <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:20px;">
+        ${mods.length} modules. Click a module to open it. Use the back bar at the top of each module to return here.
       </p>
+      <div class="exam-grid" style="max-width:none;">${cards}</div>
     </div>
   `;
 }
 
 function renderQuiz(main, subPath) {
-  main.innerHTML = `
-    <div class="card">
-      <h3>Practice Quiz</h3>
-      <p style="color:var(--text-dim);font-size:0.9rem;margin-bottom:16px;">
-        ${examMeta.questionCount} questions available. Session size: ${examMeta.sessionSize}.
-        Pass threshold: ${examMeta.passThreshold}%.
-      </p>
-      <p style="color:var(--warn);font-size:0.85rem;">
-        ⚠ Quiz engine extraction pending. See <code>js/quiz-engine.js</code> — it's a stub in the scaffold commit.
-      </p>
-    </div>
-  `;
+  if (!examMeta.tabs.quiz) {
+    return renderComingSoon(main, 'Practice Quiz', 'No quiz bank available for this exam yet.');
+  }
+  // Hand off the container to the quiz engine. It owns rendering from here.
+  PWQuiz.mount({ exam: examMeta, container: main });
 }
 
 function renderProgress(main) {

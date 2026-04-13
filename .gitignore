@@ -17,3 +17,10 @@ dist/
 # Never commit the full unsplit bank
 quiz-data.json.full
 quiz-data-compact.js
+
+# Question banks stay LOCAL ONLY.
+# Source: VCE dumps of Microsoft / Scrum.org exam content. Hosting would create
+# IP / copyright exposure. User decision 2026-04-13 — see DECISIONS.md.
+exams/*/quiz-data.json
+exams/*/questions/
+

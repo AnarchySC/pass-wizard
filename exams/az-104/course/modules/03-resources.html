@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 03: Administer Azure Resources | AZ-104</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%230078d4'/><text x='50' y='68' font-size='50' text-anchor='middle' fill='white' font-weight='bold'>Az</text></svg>">
+</head>
+<body data-module="m03">
+<div style="background:#0a0e1a;border-bottom:1px solid #1e293b;padding:10px 24px;font-size:0.85rem;font-family:system-ui,-apple-system,sans-serif;"><a href="../../index.html#course" style="color:#64748b;text-decoration:none;">&larr; Back to Pass Wizard AZ-104 hub</a></div>
+
+
+  <nav class="navbar">
+    <a href="../index.html" class="nav-brand">
+      <div class="logo">Az</div>
+      <span>AZ-104 Course</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html#modules">Modules</a></li>
+      <li><a href="https://microsoftlearning.github.io/AZ-104-MicrosoftAzureAdministrator/" target="_blank">Official Labs</a></li>
+    </ul>
+  </nav>
+
+  <div class="module-page">
+
+    <section class="module-hero">
+      <div class="module-hero-content">
+        <div class="breadcrumb">
+          <a href="../index.html">AZ-104</a>
+          <span>/</span>
+          <span>Module 03</span>
+        </div>
+        <h1>Administer Azure Resources</h1>
+        <p class="module-subtitle">Deploy resources using ARM templates and Bicep, manage Cloud Shell, and automate deployments via portal, PowerShell, and CLI.</p>
+        <div class="meta-bar">
+          <div class="meta-item">
+            <span class="icon">&#9881;</span>
+            <span>Lab 03</span>
+          </div>
+          <div class="meta-item">
+            <span class="icon">&#9655;</span>
+            <span>Demo</span>
+          </div>
+          <div class="meta-item">
+            <span class="icon">&#9998;</span>
+            <span>3 Exercises</span>
+          </div>
+          <div class="meta-item">
+            <span class="icon">&#9201;</span>
+            <span>50 min</span>
+          </div>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar" style="width: 0%"></div>
+        </div>
+        <span class="progress-label" style="font-size:0.8rem; color:var(--text-muted); margin-top:6px; display:inline-block;">0/0 completed</span>
+      </div>
+    </section>
+
+    <div class="module-content">
+
+      <div class="tab-container">
+        <div class="tab-nav">
+          <button class="tab-btn active" data-tab="tab-lesson">Lesson</button>
+          <button class="tab-btn" data-tab="tab-lab">Lab</button>
+          <button class="tab-btn" data-tab="tab-demo">Demo</button>
+          <button class="tab-btn" data-tab="tab-exercises">Exercises</button>
+          <button class="tab-btn" data-tab="tab-prove">Prove It</button>
+        </div>
+
+        <!-- ============ LESSON TAB ============ -->
+        <div id="tab-lesson" class="tab-content active">
+
+          <div class="lesson-intro">
+            <h2>What You'll Learn</h2>
+            <p>This module is about automating resource deployment. Instead of clicking through the portal every time, you'll use templates to define infrastructure as code — repeatable, consistent, and version-controlled.</p>
+            <ul class="lesson-objectives">
+              <li>Understand what ARM templates are and why they matter</li>
+              <li>Read and modify JSON template and parameter files</li>
+              <li>Deploy templates via the portal, PowerShell, and Azure CLI</li>
+              <li>Understand Bicep as a friendlier alternative to JSON</li>
+            </ul>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#128187;</span>
+              <h3>Why Infrastructure as Code?</h3>
+            </div>
+            <div class="concept-body">
+              <p>Clicking through the Azure portal works for learning, but it's terrible for production:</p>
+              <ul>
+                <li><strong>Not repeatable</strong> — Can you recreate your exact setup after someone deletes it?</li>
+                <li><strong>Not auditable</strong> — Who changed what, and when?</li>
+                <li><strong>Error-prone</strong> — Miss one checkbox and your VM is misconfigured</li>
+                <li><strong>Slow</strong> — Deploying 20 resources by hand takes hours</li>
+              </ul>
+              <p><strong>Infrastructure as Code (IaC)</strong> means defining your infrastructure in files. You describe WHAT you want (a VM with these specs, a network with these subnets) and Azure creates it. The same file always produces the same result.</p>
+            </div>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#128196;</span>
+              <h3>ARM Templates</h3>
+            </div>
+            <div class="concept-body">
+              <p>Azure Resource Manager (ARM) templates are JSON files that define Azure resources. Every ARM template has this structure:</p>
+              <div class="code-block">
+                <span class="lang-tag">JSON</span>
+{
+  "$schema": "...",
+  "contentVersion": "1.0.0.0",
+  "parameters": { },
+  "variables": { },
+  "resources": [ ],
+  "outputs": { }
+}</div>
+              <p>The <strong>parameters file</strong> is separate — it contains the values for each deployment. Same template, different parameters = different environments (dev, staging, prod).</p>
+              <div class="real-world">You can export a template from ANY existing Azure resource. This is a great way to learn — create something in the portal, export it, then study the JSON.</div>
+            </div>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#128640;</span>
+              <h3>Deployment Methods</h3>
+            </div>
+            <div class="concept-body">
+              <p>You can deploy ARM templates three ways:</p>
+              <table class="compare-table">
+                <thead>
+                  <tr><th>Method</th><th>Command</th><th>Best for</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Portal</td><td>Upload template → Deploy</td><td>One-off deployments, learning</td></tr>
+                  <tr><td>PowerShell</td><td>New-AzResourceGroupDeployment</td><td>Windows admins, scripting</td></tr>
+                  <tr><td>Azure CLI</td><td>az deployment group create</td><td>Cross-platform, Bash users</td></tr>
+                </tbody>
+              </table>
+              <p>All three produce the exact same result. The portal is visual but manual. PowerShell and CLI can be scripted and automated.</p>
+              <p><strong>Cloud Shell</strong> gives you both PowerShell and Bash directly in the browser — no local installation needed.</p>
+            </div>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#9889;</span>
+              <h3>Bicep — ARM Made Readable</h3>
+            </div>
+            <div class="concept-body">
+              <p>Bicep is Microsoft's answer to "ARM templates are too verbose." It's a domain-specific language that <strong>compiles to ARM JSON</strong>. Everything you can do in ARM, you can do in Bicep.</p>
+              <p>ARM JSON (verbose):</p>
+              <div class="code-block">
+                <span class="lang-tag">JSON</span>
+{"type": "Microsoft.Compute/disks", "apiVersion": "2021-04-01",
+ "name": "[parameters('diskName')]", "location": "[parameters('location')]",
+ "properties": {"diskSizeGB": 32}}</div>
+              <p>Bicep (clean):</p>
+              <div class="code-block">
+                <span class="lang-tag">Bicep</span>
+resource disk 'Microsoft.Compute/disks@2021-04-01' = {
+  name: diskName
+  location: location
+  properties: { diskSizeGB: 32 }
+}</div>
+              <p>You can convert between them: <code>az bicep decompile</code> (JSON → Bicep) and <code>az bicep build</code> (Bicep → JSON).</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ============ LAB TAB ============ -->
+        <div id="tab-lab" class="tab-content">
+
+          <h2 style="font-size:1.4rem; font-weight:700; margin-bottom:8px;">Lab 03 - Manage Azure Resources by Using ARM Templates</h2>
+          <p style="color:var(--text-muted); margin-bottom:32px;">Estimated time: 50 minutes</p>
+
+          <!-- Task 1 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="lab-t1">
+              <span class="task-number">1</span>
+              <h3>Create an ARM Template</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <ol class="steps">
+                <li>Create a managed disk named <strong>az104-disk1</strong> in resource group <strong>az104-rg3</strong> (East US region).</li>
+                <li>Configure the disk: <strong>Standard HDD</strong>, <strong>32 GiB</strong>, no redundancy.</li>
+                <li>Once the disk is deployed, go to the resource and select <strong>Export template</strong>.</li>
+                <li>Download both <strong>template.json</strong> and <strong>parameters.json</strong>.</li>
+              </ol>
+              <div class="info-box note">
+                <strong>Note</strong>
+                Exporting a template from a deployed resource captures its current configuration as reusable JSON, including all properties you set during creation.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 2 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="lab-t2">
+              <span class="task-number">2</span>
+              <h3>Edit and Redeploy Template</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <ol class="steps">
+                <li>Navigate to <strong>Deploy a custom template</strong> in the Azure portal.</li>
+                <li>Select <strong>Build your own template in the editor</strong> and load your downloaded <strong>template.json</strong>.</li>
+                <li>Change all disk name references from <code>az104-disk1</code> to <strong>az104-disk2</strong>.</li>
+                <li>Update the parameters file to match the new disk name.</li>
+                <li>Deploy to resource group <strong>az104-rg3</strong>.</li>
+                <li>Verify both <strong>az104-disk1</strong> and <strong>az104-disk2</strong> exist in the resource group.</li>
+              </ol>
+            </div>
+          </div>
+
+          <!-- Task 3 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="lab-t3">
+              <span class="task-number">3</span>
+              <h3>Configure Cloud Shell and Deploy with PowerShell</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <ol class="steps">
+                <li>Open <strong>Cloud Shell</strong> and select <strong>PowerShell</strong>. Mount a storage account if prompted.</li>
+                <li>Upload your <strong>template.json</strong> and <strong>parameters.json</strong> files to Cloud Shell.</li>
+                <li>Edit the template to change the disk name to <strong>az104-disk3</strong>.</li>
+                <li>Deploy the template using PowerShell:</li>
+              </ol>
+              <div class="code-block">
+                <span class="lang-tag">PowerShell</span>
+New-AzResourceGroupDeployment `
+  -ResourceGroupName az104-rg3 `
+  -TemplateFile template.json `
+  -TemplateParameterFile parameters.json
+              </div>
+              <p>Verify the deployment:</p>
+              <div class="code-block">
+                <span class="lang-tag">PowerShell</span>
+Get-AzDisk | ft Name,ResourceGroupName,Location,DiskSizeGb,ProvisioningState
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 4 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="lab-t4">
+              <span class="task-number">4</span>
+              <h3>Deploy with CLI</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <ol class="steps">
+                <li>Switch to <strong>Bash</strong> in Cloud Shell.</li>
+                <li>Edit the template to change the disk name to <strong>az104-disk4</strong>.</li>
+                <li>Deploy the template using Azure CLI:</li>
+              </ol>
+              <div class="code-block">
+                <span class="lang-tag">Bash</span>
+az deployment group create \
+  --resource-group az104-rg3 \
+  --template-file template.json \
+  --parameters parameters.json
+              </div>
+              <p>Verify the deployment:</p>
+              <div class="code-block">
+                <span class="lang-tag">Bash</span>
+az disk list --resource-group az104-rg3 --output table
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 5 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="lab-t5">
+              <span class="task-number">5</span>
+              <h3>Deploy Using Bicep</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <ol class="steps">
+                <li>Upload the <strong>azuredeploydisk.bicep</strong> file to Cloud Shell.</li>
+                <li>Edit the Bicep file with the following values:</li>
+              </ol>
+              <table class="config-table">
+                <thead>
+                  <tr>
+                    <th>Parameter</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>managedDiskName</td>
+                    <td>az104-disk5</td>
+                  </tr>
+                  <tr>
+                    <td>diskSizeinGiB</td>
+                    <td>32</td>
+                  </tr>
+                  <tr>
+                    <td>sku</td>
+                    <td>StandardSSD_LRS</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p>Deploy using Azure CLI:</p>
+              <div class="code-block">
+                <span class="lang-tag">Bash</span>
+az deployment group create \
+  --resource-group az104-rg3 \
+  --template-file azuredeploydisk.bicep
+              </div>
+              <div class="info-box tip">
+                <strong>Tip</strong>
+                Bicep files do not require a separate parameters file. Parameters can be defined with defaults directly in the .bicep file.
+              </div>
+            </div>
+          </div>
+
+          <!-- Key Takeaways -->
+          <div class="takeaways">
+            <h3>Key Takeaways</h3>
+            <ul>
+              <li>ARM templates enable group-based resource deployment as a single operation.</li>
+              <li>Separate parameter files enhance template flexibility and reusability across environments.</li>
+              <li>ARM templates can be deployed via the Azure portal, PowerShell, or CLI.</li>
+              <li>Bicep provides concise, type-safe syntax for infrastructure-as-code with less boilerplate than JSON.</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <!-- ============ DEMO TAB ============ -->
+        <div id="tab-demo" class="tab-content">
+
+          <h2 style="font-size:1.4rem; font-weight:700; margin-bottom:24px;">Demonstrations</h2>
+
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="demo-1">
+              <span class="task-number">1</span>
+              <h3>Microsoft Copilot for Azure</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Explore how Microsoft Copilot integrates with the Azure portal to assist with resource management, troubleshooting, and template generation using natural language.</p>
+            </div>
+          </div>
+
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="demo-2">
+              <span class="task-number">2</span>
+              <h3>Azure Portal Navigation and Customization</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Walk through the Azure portal interface including dashboard customization, resource group navigation, favorites, and settings for managing your Azure environment efficiently.</p>
+            </div>
+          </div>
+
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="demo-3">
+              <span class="task-number">3</span>
+              <h3>Cloud Shell (PowerShell and Bash)</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Demonstrate launching Cloud Shell, switching between PowerShell and Bash, uploading files, and running basic Azure commands in both shell environments.</p>
+            </div>
+          </div>
+
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="demo-4">
+              <span class="task-number">4</span>
+              <h3>QuickStart Templates (JSON and Bicep)</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Browse the Azure QuickStart Templates gallery, compare a JSON ARM template with its Bicep equivalent, and deploy a sample template from the gallery.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ============ EXERCISES TAB ============ -->
+        <div id="tab-exercises" class="tab-content">
+
+          <h2 style="font-size:1.4rem; font-weight:700; margin-bottom:24px;">Exercises</h2>
+
+          <!-- Exercise 1 -->
+          <div class="exercise-card">
+            <span class="difficulty easy">Easy</span>
+            <h4>Exercise 1: Template Exploration</h4>
+            <input type="checkbox" class="completion-check" data-task="ex-1" style="float:right; margin-top:-28px;">
+            <ol>
+              <li>Go to the Azure Quickstart Templates gallery.</li>
+              <li>Find a template for deploying a simple storage account.</li>
+              <li>Review the <strong>template.json</strong> &mdash; identify the <code>resources</code>, <code>parameters</code>, and <code>variables</code> sections.</li>
+              <li>Note what values are parameterized vs hardcoded.</li>
+            </ol>
+            <div class="hint">
+              <strong>Hint</strong> (click to reveal)
+              <div class="hint-text">Every ARM template has these sections: <code>$schema</code>, <code>contentVersion</code>, <code>parameters</code>, <code>variables</code>, <code>resources</code>, <code>outputs</code>.</div>
+            </div>
+          </div>
+
+          <!-- Exercise 2 -->
+          <div class="exercise-card">
+            <span class="difficulty medium">Medium</span>
+            <h4>Exercise 2: Cloud Shell Mastery</h4>
+            <input type="checkbox" class="completion-check" data-task="ex-2" style="float:right; margin-top:-28px;">
+            <ol>
+              <li>Open Cloud Shell and switch between PowerShell and Bash.</li>
+              <li>In PowerShell, list all resource groups:
+                <div class="code-block"><span class="lang-tag">PowerShell</span>Get-AzResourceGroup</div>
+              </li>
+              <li>In Bash, list all resource groups:
+                <div class="code-block"><span class="lang-tag">Bash</span>az group list --output table</div>
+              </li>
+              <li>Create a resource group using CLI:
+                <div class="code-block"><span class="lang-tag">Bash</span>az group create --name test-rg --location eastus</div>
+              </li>
+              <li>Delete it using PowerShell:
+                <div class="code-block"><span class="lang-tag">PowerShell</span>Remove-AzResourceGroup -Name test-rg</div>
+              </li>
+            </ol>
+            <div class="hint">
+              <strong>Hint</strong> (click to reveal)
+              <div class="hint-text">Cloud Shell persists files in an Azure File Share. Both shells can manage the same resources &mdash; choose based on your scripting preference.</div>
+            </div>
+          </div>
+
+          <!-- Exercise 3 -->
+          <div class="exercise-card">
+            <span class="difficulty hard">Hard</span>
+            <h4>Exercise 3: Build Your Own Template</h4>
+            <input type="checkbox" class="completion-check" data-task="ex-3" style="float:right; margin-top:-28px;">
+            <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:12px;">Create an ARM template from scratch that deploys a virtual network.</p>
+            <ol>
+              <li>Define parameters for: <code>vnetName</code>, <code>addressPrefix</code>, <code>subnetName</code>, <code>subnetPrefix</code>.</li>
+              <li>Define a <code>Microsoft.Network/virtualNetworks</code> resource.</li>
+              <li>Deploy using Cloud Shell.</li>
+              <li>Export the deployed resource's template and compare with yours.</li>
+              <li>Convert your JSON template to Bicep syntax:
+                <div class="code-block"><span class="lang-tag">Bash</span>az bicep decompile --file template.json</div>
+              </li>
+            </ol>
+            <div class="hint">
+              <strong>Hint</strong> (click to reveal)
+              <div class="hint-text">Use <code>az bicep decompile --file template.json</code> to auto-convert JSON to Bicep. Compare the output to understand how Bicep simplifies the template syntax.</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================== PROVE IT TAB ==================== -->
+        <div id="tab-prove" class="tab-content">
+          <div class="prove-intro">
+            <h2>Prove You Know It</h2>
+            <p>Not memorization — understanding. Can you apply what you learned to real situations?</p>
+            <div class="score-display">Scenarios: <span class="quiz-score">No questions answered yet</span></div>
+          </div>
+
+          <div class="assess-section">
+            <div class="assess-section-title"><span class="assess-icon scenario">?</span> Quick Scenarios</div>
+
+            <div class="quiz-card" data-qid="q1" data-answer="B">
+              <div class="quiz-scenario">
+                <span class="scenario-label">Scenario</span>
+                <p>You deployed a VM using an ARM template and need to deploy an identical one in another region. You have the template.json and parameters.json files. What's the fastest approach?</p>
+              </div>
+              <div class="quiz-options">
+                <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>Manually create the VM in the portal matching every setting</span></div>
+                <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>Edit the parameters file to change the region, then redeploy the template</span></div>
+                <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>Export the existing VM as a new template</span></div>
+              </div>
+              <div class="quiz-explanation">
+                <div class="explanation-box why-right"><strong>Why this is correct</strong>ARM templates are reusable by design. Changing parameters (region, name) and redeploying is exactly what they're built for — fast, consistent, repeatable.</div>
+                <div class="explanation-box why-wrong"><strong>Common mistakes</strong>Manually recreating (A) is slow and error-prone. Re-exporting (C) generates a new template that may include runtime-specific settings you don't need.</div>
+              </div>
+            </div>
+
+            <div class="quiz-card" data-qid="q2" data-answer="C">
+              <div class="quiz-scenario">
+                <span class="scenario-label">Scenario</span>
+                <p>Your team uses ARM templates (JSON) but finds them verbose and hard to read. A colleague suggests switching to Bicep. What's the relationship between Bicep and ARM?</p>
+              </div>
+              <div class="quiz-options">
+                <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>Bicep is a completely different deployment system</span></div>
+                <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>Bicep templates can't do everything ARM templates can</span></div>
+                <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>Bicep compiles down to ARM JSON — it's syntactic sugar with full parity</span></div>
+              </div>
+              <div class="quiz-explanation">
+                <div class="explanation-box why-right"><strong>Why this is correct</strong>Bicep is a domain-specific language that transpiles to standard ARM JSON. Everything you can do in ARM, you can do in Bicep. The compiled output IS an ARM template.</div>
+                <div class="explanation-box why-wrong"><strong>Common mistakes</strong>Bicep is NOT a separate system (A) — it's a layer on top of ARM. It has full parity (B) — you can even decompile JSON to Bicep with <code>az bicep decompile</code>.</div>
+              </div>
+            </div>
+
+            <div class="quiz-card" data-qid="q3" data-answer="A">
+              <div class="quiz-scenario">
+                <span class="scenario-label">Scenario</span>
+                <p>You're in Cloud Shell and need to deploy a template. You have both PowerShell and Bash available. Does it matter which you use?</p>
+              </div>
+              <div class="quiz-options">
+                <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>No — both can deploy ARM templates, just with different syntax</span></div>
+                <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>Yes — only PowerShell can deploy ARM templates</span></div>
+                <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>Yes — Bash is required for Bicep templates</span></div>
+              </div>
+              <div class="quiz-explanation">
+                <div class="explanation-box why-right"><strong>Why this is correct</strong>PowerShell uses <code>New-AzResourceGroupDeployment</code>, Bash uses <code>az deployment group create</code>. Both achieve the same result. Bicep works with both shells too.</div>
+                <div class="explanation-box why-wrong"><strong>Common mistakes</strong>Both shells can deploy ARM and Bicep templates (B, C). The choice is about syntax preference, not capability.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="assess-section">
+            <div class="assess-section-title"><span class="assess-icon troubleshoot">!</span> Troubleshooting Spot</div>
+
+            <div class="trouble-card">
+              <span class="trouble-label">Troubleshoot</span>
+              <p class="trouble-situation">You're deploying an ARM template and get the error: "The template parameter disk_name is not found." But you can see "disk_name" in your parameters file.</p>
+              <p class="trouble-question">What's going wrong?</p>
+              <div class="progressive-hints">
+                <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Hint 1</div><div class="prog-hint-content">ARM template parameter names are case-sensitive. Check if the template uses "disk_name" but your parameter file has "Disk_Name" or "diskName".</div></div>
+                <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Hint 2</div><div class="prog-hint-content">Check if you edited the template to rename parameters but forgot to update the parameters file (or vice versa).</div></div>
+                <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Answer</div><div class="prog-hint-content answer">Parameter names must match EXACTLY between template.json and parameters.json — including case and underscores. When you rename a parameter in the template, you must update it in the parameters file too. The error message tells you exactly which parameter it can't find.</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="assess-section">
+            <div class="assess-section-title"><span class="assess-icon architect">&#9670;</span> Architect's Corner</div>
+
+            <div class="architect-card" data-aid="a1" data-best="B">
+              <span class="architect-label">Design Decision</span>
+              <p class="architect-situation">Your team deploys infrastructure weekly. Currently everyone clicks through the portal. You want to introduce Infrastructure as Code. What's your first step?</p>
+              <div class="architect-options">
+                <div class="arch-option" data-value="A"><div class="arch-option-title">Option A</div><div class="arch-option-desc">Rewrite everything in Terraform immediately. Full IaC solution, steep learning curve, external tool.</div></div>
+                <div class="arch-option" data-value="B"><div class="arch-option-title">Option B</div><div class="arch-option-desc">Export existing resources as ARM templates, then iterate toward Bicep. Start from what you have, learn gradually.</div></div>
+                <div class="arch-option" data-value="C"><div class="arch-option-title">Option C</div><div class="arch-option-desc">Write PowerShell scripts that call az commands. Familiar syntax, imperative approach.</div></div>
+              </div>
+              <div class="architect-reveal"><strong>Why this is the best choice</strong>Exporting existing resources gives you working templates immediately — no blank-page problem. You can then clean them up, parameterize them, and gradually convert to Bicep for readability. Terraform (A) is powerful but introduces a new ecosystem and state management. PowerShell scripts (C) are imperative — they describe HOW, not WHAT, making them harder to maintain and not idempotent by default.</div>
+            </div>
+          </div>
+
+          <button class="reset-quiz-btn">&#8635; Reset All Answers</button>
+        </div>
+
+      </div><!-- /tab-container -->
+
+      <nav class="module-nav">
+        <a href="02-governance.html" class="prev">
+          <span class="nav-direction">&larr; Previous Module</span>
+          <span class="nav-title">02: Governance &amp; Compliance</span>
+        </a>
+        <a href="04-networking.html" class="next">
+          <span class="nav-direction">Next Module &rarr;</span>
+          <span class="nav-title">04: Virtual Networking</span>
+        </a>
+      </nav>
+
+    </div><!-- /module-content -->
+
+  </div><!-- /module-page -->
+
+  <footer class="site-footer">
+    <p>Built for the AZ-104 Azure Administrator certification. Lab content sourced from <a href="https://microsoftlearning.github.io/AZ-104-MicrosoftAzureAdministrator/" target="_blank">Microsoft Learning</a>.</p>
+  </footer>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

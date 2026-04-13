@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 11: Administer Monitoring | AZ-104</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%230078d4'/><text x='50' y='68' font-size='50' text-anchor='middle' fill='white' font-weight='bold'>Az</text></svg>">
+</head>
+<body data-module="m11">
+<div style="background:#0a0e1a;border-bottom:1px solid #1e293b;padding:10px 24px;font-size:0.85rem;font-family:system-ui,-apple-system,sans-serif;"><a href="../../index.html#course" style="color:#64748b;text-decoration:none;">&larr; Back to Pass Wizard AZ-104 hub</a></div>
+
+
+  <nav class="navbar">
+    <a href="../index.html" class="nav-brand">
+      <div class="logo">Az</div>
+      <span>AZ-104 Course</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html#modules">Modules</a></li>
+      <li><a href="https://microsoftlearning.github.io/AZ-104-MicrosoftAzureAdministrator/" target="_blank">Official Labs</a></li>
+    </ul>
+  </nav>
+
+  <div class="module-page">
+
+    <section class="module-hero">
+      <div class="module-hero-content">
+        <div class="breadcrumb">
+          <a href="../index.html">AZ-104</a>
+          <span>/</span>
+          <span>Module 11</span>
+        </div>
+        <h1>Administer Monitoring</h1>
+        <p class="module-subtitle">Configure Azure Monitor alerts, action groups, alert processing rules, and query logs with KQL to proactively detect and respond to issues.</p>
+        <div class="meta-bar">
+          <div class="meta-item">
+            <span class="icon">&#9776;</span>
+            <span>Lab 11</span>
+          </div>
+          <div class="meta-item">
+            <span class="icon">&#9654;</span>
+            <span>Demo</span>
+          </div>
+          <div class="meta-item">
+            <span class="icon">&#9998;</span>
+            <span>3 Exercises</span>
+          </div>
+          <div class="meta-item">
+            <span class="icon">&#9200;</span>
+            <span>40 min</span>
+          </div>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar" style="width: 0%"></div>
+        </div>
+        <span class="progress-label" style="font-size:0.8rem; color:var(--text-muted); margin-top:6px; display:inline-block;">0/6 completed</span>
+      </div>
+    </section>
+
+    <div class="module-content">
+      <div class="tab-container">
+        <div class="tab-nav">
+          <button class="tab-btn active" data-tab="tab-lesson">Lesson</button>
+          <button class="tab-btn" data-tab="tab-lab">Lab</button>
+          <button class="tab-btn" data-tab="tab-demo">Demo</button>
+          <button class="tab-btn" data-tab="tab-exercises">Exercises</button>
+          <button class="tab-btn" data-tab="tab-prove">Prove It</button>
+        </div>
+
+        <!-- ==================== LESSON TAB ==================== -->
+        <div id="tab-lesson" class="tab-content active">
+
+          <div class="lesson-intro">
+            <h2>What You'll Learn</h2>
+            <p>Monitoring tells you what's happening in your Azure environment &mdash; before users complain. This module covers Azure Monitor, alerts, action groups, Log Analytics, and KQL queries.</p>
+            <ul class="lesson-objectives">
+              <li>Understand Azure Monitor's architecture (metrics, logs, alerts)</li>
+              <li>Create alert rules that detect problems automatically</li>
+              <li>Configure action groups for notifications (email, SMS, webhooks)</li>
+              <li>Query logs using KQL (Kusto Query Language)</li>
+            </ul>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#128200;</span>
+              <h3>Azure Monitor Architecture</h3>
+            </div>
+            <div class="concept-body">
+              <p>Azure Monitor collects two types of data from every Azure resource:</p>
+              <p><strong>Metrics</strong> &mdash; Numerical values sampled at regular intervals (CPU %, disk IOPS, request count). Stored for 93 days. Fast to query, good for real-time dashboards and alerts.</p>
+              <p><strong>Logs</strong> &mdash; Detailed records of events and operations (who logged in, which API was called, what errors occurred). Stored in a Log Analytics workspace. Rich querying with KQL.</p>
+              <div class="diagram-box">
+                <pre>Azure Resources &rarr; Azure Monitor
+                   ├── Metrics &rarr; Alerts, Dashboards
+                   └── Logs &rarr; Log Analytics &rarr; KQL Queries
+                                  └── Alerts, Workbooks</pre>
+              </div>
+              <p>Everything feeds into Azure Monitor automatically. You can also send custom metrics and logs from your applications.</p>
+            </div>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#128276;</span>
+              <h3>Alerts and Action Groups</h3>
+            </div>
+            <div class="concept-body">
+              <p>An <strong>alert rule</strong> has three parts:</p>
+              <ol>
+                <li><strong>Scope</strong> &mdash; What to monitor (a VM, a subscription, a resource group)</li>
+                <li><strong>Condition</strong> &mdash; What triggers the alert (CPU &gt; 80%, VM deleted, 5xx errors &gt; 10)</li>
+                <li><strong>Action Group</strong> &mdash; Who gets notified and how</li>
+              </ol>
+              <p><strong>Action groups</strong> support multiple notification types:</p>
+              <ul>
+                <li>Email &mdash; Good for records, bad for urgency</li>
+                <li>SMS &mdash; Immediate, hard to miss</li>
+                <li>Voice call &mdash; For critical, wake-up-at-3AM alerts</li>
+                <li>Webhook &mdash; Trigger external systems (PagerDuty, ServiceNow, Slack)</li>
+                <li>Azure Function / Logic App &mdash; Automated response</li>
+              </ul>
+              <p><strong>Alert severity levels:</strong></p>
+              <ul>
+                <li>Sev 0: Critical (entire system down)</li>
+                <li>Sev 1: Error (significant functionality impacted)</li>
+                <li>Sev 2: Warning (potential issue developing)</li>
+                <li>Sev 3: Informational (something noteworthy happened)</li>
+                <li>Sev 4: Verbose (detailed diagnostic info)</li>
+              </ul>
+              <div class="real-world">Use tiered notifications: Sev 0&ndash;1 &rarr; SMS + voice call to on-call. Sev 2 &rarr; email to team. Sev 3&ndash;4 &rarr; log only. Alert fatigue kills monitoring &mdash; if everything pages, nothing gets attention.</div>
+            </div>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#128263;</span>
+              <h3>Alert Processing Rules</h3>
+            </div>
+            <div class="concept-body">
+              <p>Alert processing rules let you <strong>suppress or modify notifications</strong> without disabling the alert rules themselves.</p>
+              <p><strong>Use case:</strong> Planned maintenance every Sunday 2&ndash;4 AM. You don't want 50 alerts flooding your inbox during expected downtime.</p>
+              <p>An alert processing rule says: "For this scope, during this time window, suppress notifications." The alerts still fire and are recorded &mdash; you just don't get notified. When the maintenance window ends, notifications resume automatically.</p>
+            </div>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#128269;</span>
+              <h3>Log Analytics and KQL</h3>
+            </div>
+            <div class="concept-body">
+              <p><strong>Log Analytics</strong> is where Azure stores all log data. You query it using <strong>KQL (Kusto Query Language)</strong> &mdash; a pipeline-based query language.</p>
+              <p><strong>KQL basics</strong> &mdash; data flows left to right through pipes:</p>
+              <div class="diagram-box">
+                <pre>Heartbeat                              // Start with a table
+| where TimeGenerated > ago(1h)        // Filter rows
+| where Computer contains "web"        // More filtering
+| summarize count() by Computer        // Aggregate
+| sort by count_ desc                  // Sort
+| render barchart                      // Visualize</pre>
+              </div>
+              <p><strong>Common tables:</strong></p>
+              <ul>
+                <li><span class="key-term">Heartbeat</span> &mdash; VM agent check-ins (is the VM alive?)</li>
+                <li><span class="key-term">Perf</span> &mdash; Performance counters (CPU, memory, disk)</li>
+                <li><span class="key-term">AzureActivity</span> &mdash; Control plane operations (who did what)</li>
+                <li><span class="key-term">InsightsMetrics</span> &mdash; VM Insights metrics</li>
+                <li><span class="key-term">Syslog</span> / <span class="key-term">Event</span> &mdash; OS-level logs (Linux / Windows)</li>
+              </ul>
+              <div class="info-box tip"><strong>Tip:</strong> Start with pre-built queries in Log Analytics (Queries tab). They show you the available tables and common patterns. Modify them to learn KQL by example rather than from scratch.</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================== LAB TAB ==================== -->
+        <div id="tab-lab" class="tab-content">
+
+          <h2 style="margin-bottom: 8px;">Lab 11 &mdash; Implement Monitoring</h2>
+          <p style="color: var(--text-muted); margin-bottom: 32px;">Estimated time: 40 minutes</p>
+
+          <!-- Task 1 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t1">
+              <span class="task-number">1</span>
+              <h3>Provision Infrastructure</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Deploy the lab infrastructure using an ARM template and enable VM Insights for monitoring.</p>
+
+              <ol class="steps">
+                <li>Deploy the <strong>az104-11-vm-template.json</strong> ARM template:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Resource Group</td><td>az104-rg11 (create new)</td></tr>
+                    <tr><td>Region</td><td>East US</td></tr>
+                  </table>
+                </li>
+                <li>Wait for the deployment to complete.</li>
+                <li>Navigate to <strong>Monitor</strong> and enable <strong>VM Insights</strong> for the deployed virtual machine.</li>
+              </ol>
+
+              <div class="info-box note">
+                <strong>Note</strong>
+                VM Insights provides detailed performance and health monitoring for your VMs, including dependency mapping and performance trending.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 2 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t2">
+              <span class="task-number">2</span>
+              <h3>Create Alert</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Create an alert rule that fires when a virtual machine is deleted.</p>
+
+              <ol class="steps">
+                <li>Navigate to <strong>Monitor</strong> &rarr; <strong>Alerts</strong> &rarr; <strong>Create alert rule</strong>.</li>
+                <li>Set the <strong>Scope</strong> to your subscription (all VMs).</li>
+                <li>On the <strong>Condition</strong> tab, search for and select the signal:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Signal</td><td>Delete Virtual Machine (Virtual Machines)</td></tr>
+                  </table>
+                </li>
+                <li>Continue to the <strong>Actions</strong> tab (configured in Task 3).</li>
+              </ol>
+
+              <div class="info-box tip">
+                <strong>Tip</strong>
+                Activity log alerts monitor control plane operations (create, delete, update). They fire based on events, not metrics, and do not require a Log Analytics workspace.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 3 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t3">
+              <span class="task-number">3</span>
+              <h3>Configure Action Group</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Create an action group to define who gets notified when the alert fires.</p>
+
+              <ol class="steps">
+                <li>On the <strong>Actions</strong> tab of the alert rule, click <strong>Create action group</strong>:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Action group name</td><td>Alert the operations team</td></tr>
+                    <tr><td>Short name</td><td>AlertOpsTeam</td></tr>
+                    <tr><td>Resource Group</td><td>az104-rg11</td></tr>
+                  </table>
+                </li>
+                <li>On the <strong>Notifications</strong> tab:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Notification type</td><td>Email</td></tr>
+                    <tr><td>Name</td><td>VM was deleted</td></tr>
+                  </table>
+                </li>
+                <li>Complete the action group creation.</li>
+                <li>Set the alert rule name to <strong>VM was deleted</strong>.</li>
+                <li>Click <strong>Review + create</strong>, then <strong>Create</strong>.</li>
+              </ol>
+
+              <div class="info-box note">
+                <strong>Note</strong>
+                Action groups can include multiple notification types: email, SMS, push notifications, voice calls, and automated actions like Azure Functions, Logic Apps, or webhooks.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 4 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t4">
+              <span class="task-number">4</span>
+              <h3>Trigger and Validate Alert</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Delete a VM to trigger the alert and verify the notification is received.</p>
+
+              <ol class="steps">
+                <li>Navigate to <strong>az104-vm0</strong> and click <strong>Delete</strong>.</li>
+                <li>Check the <strong>Apply force delete</strong> option and confirm deletion.</li>
+                <li>Check your email for a notification from <strong>azure-noreply@microsoft.com</strong>.</li>
+                <li>Navigate to <strong>Monitor</strong> &rarr; <strong>Alerts</strong> and verify <strong>3 verbose alerts</strong> appear.</li>
+              </ol>
+
+              <div class="info-box tip">
+                <strong>Tip</strong>
+                Alert notifications may take a few minutes to arrive. Refresh the Alerts blade to see updated counts. Verbose (Sev 4) alerts are used for informational purposes.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 5 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t5">
+              <span class="task-number">5</span>
+              <h3>Configure Alert Processing Rule</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Create a rule to suppress alert notifications during a planned maintenance window.</p>
+
+              <ol class="steps">
+                <li>Navigate to <strong>Monitor</strong> &rarr; <strong>Alerts</strong> &rarr; <strong>Alert processing rules</strong>.</li>
+                <li>Click <strong>+ Create</strong> and configure:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Action</td><td>Suppress notifications</td></tr>
+                    <tr><td>Schedule start</td><td>10 PM tonight</td></tr>
+                    <tr><td>Schedule end</td><td>7 AM tomorrow</td></tr>
+                    <tr><td>Rule name</td><td>Planned Maintenance</td></tr>
+                  </table>
+                </li>
+                <li>Click <strong>Review + create</strong>, then <strong>Create</strong>.</li>
+              </ol>
+
+              <div class="info-box note">
+                <strong>Note</strong>
+                Alert processing rules apply to already-fired alerts. They can suppress notifications or add action groups without modifying the original alert rules. This is ideal for planned maintenance windows.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 6 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t6">
+              <span class="task-number">6</span>
+              <h3>Azure Monitor Log Queries</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Use KQL (Kusto Query Language) to query Azure Monitor logs.</p>
+
+              <ol class="steps">
+                <li>Navigate to <strong>Monitor</strong> &rarr; <strong>Logs</strong> and set the scope to your subscription.</li>
+                <li>Run the pre-built <strong>Count heartbeats</strong> query from the query library.</li>
+                <li>Switch to <strong>KQL mode</strong> for direct query editing.</li>
+                <li>Run the following custom query to chart CPU utilization:
+                  <div class="code-block">
+                    <span class="lang-tag">KQL</span>
+InsightsMetrics
+| where TimeGenerated > ago(1h)
+| where Name == "UtilizationPercentage"
+| summarize avg(Val) by bin(TimeGenerated, 5m), Computer
+| render timechart
+                  </div>
+                </li>
+                <li>Review the resulting time chart showing CPU utilization per VM over the last hour.</li>
+              </ol>
+
+              <div class="info-box tip">
+                <strong>Tip</strong>
+                KQL processes queries top-to-bottom like a pipeline. Each line filters or transforms the data from the previous line. Use <code>render</code> as the final operator to visualize results.
+              </div>
+            </div>
+          </div>
+
+          <!-- Key Takeaways -->
+          <div class="takeaways">
+            <h3>Key Takeaways</h3>
+            <ul>
+              <li>Alerts enable early issue detection before user impact.</li>
+              <li>Action groups define notification recipients and automated responses.</li>
+              <li>Alert processing rules suppress notifications during planned maintenance.</li>
+              <li>KQL (Kusto Query Language) queries Azure Monitor logs for deep analysis.</li>
+              <li>Activity logs track all resource operations across your subscription.</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <!-- ==================== DEMO TAB ==================== -->
+        <div id="tab-demo" class="tab-content">
+
+          <h2 style="margin-bottom: 32px;">Demonstrations</h2>
+
+          <div class="task-block">
+            <div class="task-header">
+              <span class="task-number">1</span>
+              <h3>Azure Monitor Alerts: Scope, Signals, Conditions, Severity</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Walk through creating alerts in Azure Monitor, demonstrating:</p>
+              <ol class="steps">
+                <li><strong>Scope</strong>: How to target alerts at subscription, resource group, or individual resource level.</li>
+                <li><strong>Signal types</strong>: Metrics (CPU, memory), activity log (create, delete), and log search (KQL-based).</li>
+                <li><strong>Conditions</strong>: Thresholds (static vs dynamic), aggregation type, evaluation frequency.</li>
+                <li><strong>Severity levels</strong>: Sev 0 (Critical) through Sev 4 (Verbose) and when to use each.</li>
+                <li>Show the alert rule summary and estimated cost before creation.</li>
+              </ol>
+              <div class="info-box note">
+                <strong>Note</strong>
+                Dynamic thresholds use machine learning to automatically determine normal behavior patterns and only alert on true anomalies, reducing alert fatigue.
+              </div>
+            </div>
+          </div>
+
+          <div class="task-block">
+            <div class="task-header">
+              <span class="task-number">2</span>
+              <h3>Action Groups and Notification Types</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Demonstrate creating and configuring action groups:</p>
+              <ol class="steps">
+                <li>Create an action group with multiple notification types: email, SMS, and push notification.</li>
+                <li>Show the <strong>Actions</strong> tab: Azure Function, Logic App, Webhook, ITSM, Automation Runbook.</li>
+                <li>Test the action group using the <strong>Test</strong> button to verify notifications are received.</li>
+                <li>Demonstrate reusing the same action group across multiple alert rules.</li>
+              </ol>
+              <div class="info-box tip">
+                <strong>Tip</strong>
+                Action groups have rate limits: no more than 1 SMS every 5 minutes, 1 voice call every 5 minutes, and 100 emails per hour per action group.
+              </div>
+            </div>
+          </div>
+
+          <div class="task-block">
+            <div class="task-header">
+              <span class="task-number">3</span>
+              <h3>Log Analytics: Table Structure and Pre-built Queries</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Explore the Log Analytics workspace and its capabilities:</p>
+              <ol class="steps">
+                <li>Navigate to a Log Analytics workspace and show the <strong>Tables</strong> schema browser.</li>
+                <li>Explain key tables: <code>Heartbeat</code>, <code>Perf</code>, <code>Event</code>, <code>InsightsMetrics</code>, <code>AzureActivity</code>.</li>
+                <li>Browse the <strong>Queries</strong> library and run pre-built queries for VM performance.</li>
+                <li>Show how to save queries to <strong>Favorites</strong> for quick access.</li>
+                <li>Demonstrate exporting query results to CSV or pinning charts to a dashboard.</li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="task-block">
+            <div class="task-header">
+              <span class="task-number">4</span>
+              <h3>KQL Syntax Fundamentals</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Teach the core KQL operators through live examples:</p>
+              <ol class="steps">
+                <li><code>where</code> &mdash; filter rows by condition.</li>
+                <li><code>summarize</code> &mdash; aggregate data (count, avg, sum, max, min).</li>
+                <li><code>project</code> &mdash; select and rename columns.</li>
+                <li><code>extend</code> &mdash; add calculated columns.</li>
+                <li><code>bin()</code> &mdash; group time values into intervals for charting.</li>
+                <li><code>render</code> &mdash; visualize results as timechart, barchart, piechart.</li>
+                <li>Show how the pipe (<code>|</code>) operator chains commands in a top-to-bottom pipeline.</li>
+              </ol>
+              <div class="info-box tip">
+                <strong>Tip</strong>
+                Start KQL queries with the table name, then filter aggressively with <code>where</code> before aggregating. This reduces the data processed and speeds up queries.
+              </div>
+            </div>
+          </div>
+
+          <div class="task-block">
+            <div class="task-header">
+              <span class="task-number">5</span>
+              <h3>Favorites and Saved Queries</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Show how to organize and reuse queries in Log Analytics:</p>
+              <ol class="steps">
+                <li>Save a custom query using the <strong>Save</strong> button and assign a category.</li>
+                <li>Mark frequently used queries as <strong>Favorites</strong> for quick access.</li>
+                <li>Show the <strong>Query explorer</strong> panel with saved and shared queries.</li>
+                <li>Demonstrate sharing queries across the team via the workspace.</li>
+                <li>Create a query-based alert rule directly from the Logs blade.</li>
+              </ol>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================== EXERCISES TAB ==================== -->
+        <div id="tab-exercises" class="tab-content">
+
+          <h2 style="margin-bottom: 32px;">Exercises</h2>
+
+          <!-- Exercise 1 -->
+          <div class="exercise-card">
+            <span class="difficulty easy">Easy</span>
+            <h4>Exercise 1: Alert Exploration</h4>
+            <ol>
+              <li>Navigate to <strong>Monitor</strong> &rarr; <strong>Alerts</strong>.</li>
+              <li>Review any existing alerts and their severity levels (0&ndash;4).</li>
+              <li>Check the <strong>Alert processing rules</strong> blade.</li>
+              <li>Document: What are the 5 severity levels and when would you use each?</li>
+            </ol>
+            <div class="hint">
+              <strong>Show Hint</strong>
+              <div class="hint-text">Sev 0 = Critical (service down), Sev 1 = Error (functionality impacted), Sev 2 = Warning (potential issue), Sev 3 = Informational (awareness), Sev 4 = Verbose (diagnostic detail). Match severity to business impact.</div>
+            </div>
+          </div>
+
+          <!-- Exercise 2 -->
+          <div class="exercise-card">
+            <span class="difficulty medium">Medium</span>
+            <h4>Exercise 2: KQL Query Practice</h4>
+            <ol>
+              <li>Open <strong>Monitor</strong> &rarr; <strong>Logs</strong> and set scope to your subscription.</li>
+              <li>Run these queries and document the results:
+                <ul>
+                  <li><code>Heartbeat | summarize count() by Computer</code> &mdash; which VMs are reporting?</li>
+                  <li><code>AzureActivity | where OperationNameValue contains "delete" | project TimeGenerated, Caller, OperationNameValue</code> &mdash; who deleted what?</li>
+                  <li><code>Perf | where CounterName == "% Processor Time" | summarize avg(CounterValue) by Computer</code> &mdash; average CPU per VM</li>
+                </ul>
+              </li>
+              <li>Modify one query to filter to the last 24 hours only.</li>
+            </ol>
+            <div class="hint">
+              <strong>Show Hint</strong>
+              <div class="hint-text">Use <code>| where TimeGenerated > ago(24h)</code> to filter by time. KQL processes top-to-bottom like a pipeline. Place the time filter early in the query for best performance.</div>
+            </div>
+          </div>
+
+          <!-- Exercise 3 -->
+          <div class="exercise-card">
+            <span class="difficulty hard">Hard</span>
+            <h4>Exercise 3: Full Monitoring Solution Design</h4>
+            <ol>
+              <li>Design a monitoring strategy for a production web application.</li>
+              <li>Create alerts for:
+                <ul>
+                  <li>VM CPU &gt; 80%</li>
+                  <li>Disk space &lt; 20%</li>
+                  <li>HTTP 5xx errors &gt; 10/min</li>
+                </ul>
+              </li>
+              <li>Configure action groups: email to ops team, SMS to on-call engineer.</li>
+              <li>Create an alert processing rule: suppress non-critical alerts during weekly maintenance window (Sunday 2&ndash;4 AM).</li>
+              <li>Write KQL queries to build a dashboard showing: request rate, error rate, response time, and CPU utilization.</li>
+              <li>Document: How would you integrate this with PagerDuty or ServiceNow?</li>
+            </ol>
+            <div class="hint">
+              <strong>Show Hint</strong>
+              <div class="hint-text">Azure Monitor supports webhooks in action groups, which can trigger PagerDuty incidents or ServiceNow tickets via their respective APIs. Use separate action groups for different escalation tiers (email for warnings, SMS+webhook for critical).</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================== PROVE IT TAB ==================== -->
+        <div id="tab-prove" class="tab-content">
+          <div class="prove-intro">
+            <h2>Prove You Know It</h2>
+            <p>Not memorization — understanding. Can you apply what you learned to real situations?</p>
+            <div class="score-display">Scenarios: <span class="quiz-score">No questions answered yet</span></div>
+          </div>
+
+          <div class="assess-section">
+            <div class="assess-section-title"><span class="assess-icon scenario">?</span> Quick Scenarios</div>
+
+            <div class="quiz-card" data-qid="q1" data-answer="B">
+              <div class="quiz-scenario">
+                <span class="scenario-label">Scenario</span>
+                <p>You created an alert rule for "VM Deleted" scoped to your subscription. A colleague deleted a VM in a different resource group than expected. Did the alert fire?</p>
+              </div>
+              <div class="quiz-options">
+                <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>No &mdash; alerts only fire in the resource group where they're configured</span></div>
+                <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>Yes &mdash; the alert is scoped to the subscription, which includes all resource groups</span></div>
+                <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>No &mdash; delete alerts require specific VM targeting</span></div>
+              </div>
+              <div class="quiz-explanation">
+                <div class="explanation-box why-right"><strong>Why this is correct</strong>Alert scope determines what gets monitored. Subscription scope covers ALL resource groups and resources within it. The alert fires for any VM deletion anywhere in the subscription.</div>
+                <div class="explanation-box why-wrong"><strong>Common mistakes</strong>Confusing alert scope with alert rule resource group. The resource group where the alert rule lives is just for management &mdash; the scope determines what triggers the alert.</div>
+              </div>
+            </div>
+
+            <div class="quiz-card" data-qid="q2" data-answer="C">
+              <div class="quiz-scenario">
+                <span class="scenario-label">Scenario</span>
+                <p>You set up an email action group for critical alerts. During a weekend outage, the on-call engineer didn't get the email for 20 minutes. What should you add?</p>
+              </div>
+              <div class="quiz-options">
+                <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>A second email address as backup</span></div>
+                <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>A webhook to create a Jira ticket</span></div>
+                <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>SMS and/or voice call notifications to the action group</span></div>
+              </div>
+              <div class="quiz-explanation">
+                <div class="explanation-box why-right"><strong>Why this is correct</strong>Email is not reliable for urgent alerts &mdash; it can be delayed, filtered, or missed. SMS and voice calls provide immediate, hard-to-miss notifications. Best practice: use email for record-keeping AND SMS/voice for urgency.</div>
+                <div class="explanation-box why-wrong"><strong>Common mistakes</strong>A second email has the same delay problem. Webhooks to Jira are for tracking, not immediate notification. For critical alerts, you need push-based channels like SMS or voice.</div>
+              </div>
+            </div>
+
+            <div class="quiz-card" data-qid="q3" data-answer="A">
+              <div class="quiz-scenario">
+                <span class="scenario-label">Scenario</span>
+                <p>Your team gets 50+ alert emails every night during scheduled maintenance. Most are routine and can be ignored. How do you fix this without disabling the alerts?</p>
+              </div>
+              <div class="quiz-options">
+                <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>Create an alert processing rule that suppresses notifications during the maintenance window</span></div>
+                <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>Delete the alert rules and recreate them after maintenance</span></div>
+                <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>Add a filter to the email action group to ignore certain alerts</span></div>
+              </div>
+              <div class="quiz-explanation">
+                <div class="explanation-box why-right"><strong>Why this is correct</strong>Alert processing rules can suppress notifications on a schedule (e.g., Sunday 2-4 AM) without disabling the actual alert rules. The alerts still fire and are recorded &mdash; you just don't get notified.</div>
+                <div class="explanation-box why-wrong"><strong>Common mistakes</strong>Deleting rules loses monitoring coverage. Email filters are fragile and outside Azure's control. Alert processing rules are the purpose-built solution for this exact scenario.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="assess-section">
+            <div class="assess-section-title"><span class="assess-icon troubleshoot">!</span> Troubleshooting Spot</div>
+
+            <div class="trouble-card">
+              <span class="trouble-label">Troubleshoot</span>
+              <p class="trouble-situation">You wrote a KQL query in Log Analytics but it returns no data: <code>Heartbeat | where Computer == 'myVM' | where TimeGenerated > ago(1h)</code>. The VM is running and was recently enabled for monitoring.</p>
+              <p class="trouble-question">What's wrong?</p>
+              <div class="progressive-hints">
+                <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Hint 1</div><div class="prog-hint-content">VM Insights / Log Analytics agent takes time to start sending data. If you just enabled it, wait 10-15 minutes for initial data ingestion.</div></div>
+                <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Hint 2</div><div class="prog-hint-content">Check if the Computer name matches exactly &mdash; KQL string comparisons are case-sensitive. Try <code>Heartbeat | where Computer contains 'myVM'</code> instead.</div></div>
+                <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Answer</div><div class="prog-hint-content answer">Two common issues: 1) The agent was just installed and hasn't sent data yet &mdash; initial ingestion takes 5-15 minutes, and some data types (like InsightsMetrics) take even longer. 2) The Computer name doesn't match exactly &mdash; use <code>Heartbeat | distinct Computer</code> to see the actual names in your workspace. Computer names often include the FQDN (e.g., "myVM.internal.cloudapp.net" instead of "myVM").</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="assess-section">
+            <div class="assess-section-title"><span class="assess-icon architect">&#9670;</span> Architect's Corner</div>
+
+            <div class="architect-card" data-aid="a1" data-best="B">
+              <span class="architect-label">Design Decision</span>
+              <p class="architect-situation">You're setting up monitoring for a production environment with 20 VMs, 5 App Services, and 3 SQL databases. What's your monitoring strategy?</p>
+              <div class="architect-options">
+                <div class="arch-option" data-value="A"><div class="arch-option-title">Option A: Azure Monitor alerts on each individual resource with email notifications</div><div class="arch-option-desc">Granular, 28+ individual alert rules, email-only</div></div>
+                <div class="arch-option" data-value="B"><div class="arch-option-title">Option B: Centralized Log Analytics workspace + metric alerts with tiered action groups (email for warnings, SMS+email for critical)</div><div class="arch-option-desc">Unified monitoring, severity-based notifications, dashboards</div></div>
+                <div class="arch-option" data-value="C"><div class="arch-option-title">Option C: Third-party monitoring tool (Datadog/New Relic) replacing Azure Monitor entirely</div><div class="arch-option-desc">Powerful, but additional cost and integration overhead</div></div>
+              </div>
+              <div class="architect-reveal"><strong>Why this is the best choice</strong>A centralized Log Analytics workspace gives you one place to query across all resources. Metric alerts catch threshold breaches (CPU, DTU, response time). Tiered action groups ensure critical issues get immediate attention (SMS/voice) while warnings only email. Build Azure dashboards with KQL queries for real-time visibility. Option A creates alert sprawl with no unified view. Option C can complement Azure Monitor but shouldn't replace it &mdash; Azure Monitor provides native integration and is already included in your Azure costs.</div>
+            </div>
+          </div>
+
+          <button class="reset-quiz-btn">&#8635; Reset All Answers</button>
+        </div>
+
+      </div><!-- /tab-container -->
+
+      <nav class="module-nav">
+        <a href="10-data-protection.html" class="prev">
+          <span class="nav-direction">&larr; Previous Module</span>
+          <span class="nav-title">10: Data Protection</span>
+        </a>
+      </nav>
+
+    </div><!-- /module-content -->
+
+  </div><!-- /module-page -->
+
+  <footer class="site-footer">
+    <p>Built for the AZ-104 Azure Administrator certification. Lab content sourced from <a href="https://microsoftlearning.github.io/AZ-104-MicrosoftAzureAdministrator/" target="_blank">Microsoft Learning</a>.</p>
+  </footer>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

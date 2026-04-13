@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 04: Implement Virtual Networking | AZ-104</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%230078d4'/><text x='50' y='68' font-size='50' text-anchor='middle' fill='white' font-weight='bold'>Az</text></svg>">
+</head>
+<body data-module="m04">
+<div style="background:#0a0e1a;border-bottom:1px solid #1e293b;padding:10px 24px;font-size:0.85rem;font-family:system-ui,-apple-system,sans-serif;"><a href="../../index.html#course" style="color:#64748b;text-decoration:none;">&larr; Back to Pass Wizard AZ-104 hub</a></div>
+
+
+  <nav class="navbar">
+    <a href="../index.html" class="nav-brand">
+      <div class="logo">Az</div>
+      <span>AZ-104 Course</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html#modules">Modules</a></li>
+      <li><a href="https://microsoftlearning.github.io/AZ-104-MicrosoftAzureAdministrator/" target="_blank">Official Labs</a></li>
+    </ul>
+  </nav>
+
+  <div class="module-page">
+
+    <section class="module-hero">
+      <div class="module-hero-content">
+        <div class="breadcrumb">
+          <a href="../index.html">AZ-104</a>
+          <span>/</span>
+          <span>Module 04</span>
+        </div>
+        <h1>Implement Virtual Networking</h1>
+        <p class="module-subtitle">Create virtual networks, configure subnets, NSGs, application security groups, and DNS zones.</p>
+        <div class="meta-bar">
+          <div class="meta-item">
+            <span class="icon">&#9776;</span>
+            <span>Lab 04</span>
+          </div>
+          <div class="meta-item">
+            <span class="icon">&#9654;</span>
+            <span>Demo</span>
+          </div>
+          <div class="meta-item">
+            <span class="icon">&#9998;</span>
+            <span>3 Exercises</span>
+          </div>
+          <div class="meta-item">
+            <span class="icon">&#9200;</span>
+            <span>50 min</span>
+          </div>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar" style="width: 0%"></div>
+        </div>
+        <span class="progress-label" style="font-size:0.8rem; color:var(--text-muted); margin-top:6px; display:inline-block;">0/4 completed</span>
+      </div>
+    </section>
+
+    <div class="module-content">
+      <div class="tab-container">
+        <div class="tab-nav">
+          <button class="tab-btn active" data-tab="tab-lesson">Lesson</button>
+          <button class="tab-btn" data-tab="tab-lab">Lab</button>
+          <button class="tab-btn" data-tab="tab-demo">Demo</button>
+          <button class="tab-btn" data-tab="tab-exercises">Exercises</button>
+          <button class="tab-btn" data-tab="tab-prove">Prove It</button>
+        </div>
+
+        <!-- ==================== LESSON TAB ==================== -->
+        <div id="tab-lesson" class="tab-content active">
+
+          <div class="lesson-intro">
+            <h2>What You'll Learn</h2>
+            <p>Virtual networking is the foundation of Azure infrastructure. Every VM, database, and app service communicates over a network. This module teaches you how to build, segment, and secure Azure networks.</p>
+            <ul class="lesson-objectives">
+              <li>Create virtual networks and subnets with proper IP planning</li>
+              <li>Understand and configure Network Security Groups (NSGs)</li>
+              <li>Use Application Security Groups (ASGs) for logical grouping</li>
+              <li>Configure public and private DNS zones</li>
+            </ul>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#127760;</span>
+              <h3>Virtual Networks and Subnets</h3>
+            </div>
+            <div class="concept-body">
+              <p>A <strong>Virtual Network (VNet)</strong> is your private network in Azure. It's an isolated section of the Azure cloud where you deploy resources. Nothing can communicate with your VNet unless you explicitly allow it.</p>
+              <p>Every VNet has an <strong>address space</strong> — a range of private IP addresses (like 10.0.0.0/16). Within that, you create <strong>subnets</strong> — smaller ranges that segment your network.</p>
+              <div class="diagram-box">
+<pre>VNet: 10.0.0.0/16 (65,536 addresses)
+├── Web Subnet:  10.0.1.0/24 (251 usable)
+├── App Subnet:  10.0.2.0/24 (251 usable)
+└── DB Subnet:   10.0.3.0/24 (251 usable)</pre>
+              </div>
+              <p>Critical rules:</p>
+              <ul>
+                <li>VNet address spaces MUST NOT overlap if you plan to peer them</li>
+                <li>Azure reserves 5 addresses per subnet (first 4 + last 1)</li>
+                <li>A /24 gives 251 usable addresses, not 256</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#128737;</span>
+              <h3>Network Security Groups (NSGs)</h3>
+            </div>
+            <div class="concept-body">
+              <p>NSGs are Azure's built-in firewall. They contain <strong>rules</strong> that allow or deny traffic based on source, destination, port, and protocol.</p>
+              <p>Key concepts:</p>
+              <ul>
+                <li>Rules have a <strong>priority</strong> (100-4096). Lower number = higher priority.</li>
+                <li>Rules are evaluated in priority order. <strong>First match wins.</strong></li>
+                <li>NSGs can be attached to <strong>subnets</strong> OR <strong>network interfaces</strong> (NICs). If both exist, traffic must pass BOTH.</li>
+                <li>Default rules (priority 65000+) allow VNet-to-VNet traffic and deny inbound from the internet.</li>
+              </ul>
+              <table class="compare-table">
+                <thead>
+                  <tr><th>Priority</th><th>Name</th><th>Direction</th><th>Action</th><th>Port</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>100</td><td>AllowSSH</td><td>Inbound</td><td>Allow</td><td>22</td></tr>
+                  <tr><td>200</td><td>AllowHTTP</td><td>Inbound</td><td>Allow</td><td>80,443</td></tr>
+                  <tr><td>4096</td><td>DenyAll</td><td>Inbound</td><td>Deny</td><td>*</td></tr>
+                  <tr><td>65000</td><td>AllowVNet</td><td>Inbound</td><td>Allow</td><td>*</td></tr>
+                </tbody>
+              </table>
+              <p>In this example: SSH and HTTP are allowed. Everything else is denied by rule 4096 BEFORE the default AllowVNet rule at 65000 is reached.</p>
+            </div>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#128230;</span>
+              <h3>Application Security Groups (ASGs)</h3>
+            </div>
+            <div class="concept-body">
+              <p>ASGs let you group VMs logically (like "web servers" or "database servers") and use those groups in NSG rules instead of IP addresses.</p>
+              <p>Without ASGs: "Allow traffic from 10.0.1.4, 10.0.1.5, 10.0.1.6 to port 80" — breaks when IPs change.</p>
+              <p>With ASGs: "Allow traffic from ASG-WebServers to port 80" — works regardless of IP changes.</p>
+            </div>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#128209;</span>
+              <h3>Azure DNS</h3>
+            </div>
+            <div class="concept-body">
+              <p>Azure DNS hosts DNS zones so you can manage DNS records in Azure.</p>
+              <p><strong>Public DNS zones</strong> resolve names from the internet. You create records (A, CNAME, TXT, MX) and point your domain's nameservers to Azure's DNS servers.</p>
+              <p><strong>Private DNS zones</strong> resolve names only within linked VNets. They're for internal name resolution — like <span class="key-term">db.internal.myapp.com</span> resolving to a private IP. No one outside your VNet can see these records.</p>
+              <div class="info-box note"><strong>Note:</strong> Private DNS zones must be explicitly linked to each VNet that needs to use them. Creating the zone alone isn't enough.</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================== LAB TAB ==================== -->
+        <div id="tab-lab" class="tab-content">
+
+          <h2 style="margin-bottom: 8px;">Lab 04 &mdash; Implement Virtual Networking</h2>
+          <p style="color: var(--text-muted); margin-bottom: 32px;">Estimated time: 50 minutes</p>
+
+          <!-- Task 1 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t1">
+              <span class="task-number">1</span>
+              <h3>Create Virtual Network with Subnets via Portal</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Create the core services virtual network using the Azure Portal.</p>
+
+              <ol class="steps">
+                <li>Navigate to <strong>Virtual Networks</strong> and click <strong>+ Create</strong>.</li>
+                <li>Configure the basics:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Resource Group</td><td>az104-rg4 (create new)</td></tr>
+                    <tr><td>Name</td><td>CoreServicesVnet</td></tr>
+                    <tr><td>Region</td><td>East US</td></tr>
+                  </table>
+                </li>
+                <li>On the <strong>IP Addresses</strong> tab, set the address space to <strong>10.20.0.0/16</strong>.</li>
+                <li>Delete the <strong>default</strong> subnet.</li>
+                <li>Add subnet <strong>SharedServicesSubnet</strong> with address range <strong>10.20.10.0/24</strong>.</li>
+                <li>Add subnet <strong>DatabaseSubnet</strong> with address range <strong>10.20.20.0/24</strong>.</li>
+                <li>Click <strong>Review + create</strong>, then <strong>Create</strong>.</li>
+                <li>Once deployed, go to the resource and click <strong>Export template</strong> to save the ARM template for reuse.</li>
+              </ol>
+
+              <div class="info-box note">
+                <strong>Note</strong>
+                Exporting the template captures the full configuration of your VNet including subnets, which you can modify and redeploy for similar environments.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 2 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t2">
+              <span class="task-number">2</span>
+              <h3>Create Virtual Network Using Template</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Modify the exported template to deploy a second virtual network for a manufacturing environment.</p>
+
+              <ol class="steps">
+                <li>Open the exported template JSON file from Task 1.</li>
+                <li>Replace all occurrences of <strong>CoreServicesVnet</strong> with <strong>ManufacturingVnet</strong>.</li>
+                <li>Replace the address space <strong>10.20.0.0</strong> with <strong>10.30.0.0</strong> (keep /16 prefix).</li>
+                <li>Update the subnets:
+                  <table class="config-table">
+                    <tr><th>Subnet Name</th><th>Address Range</th></tr>
+                    <tr><td>SensorSubnet1</td><td>10.30.20.0/24</td></tr>
+                    <tr><td>SensorSubnet2</td><td>10.30.21.0/24</td></tr>
+                  </table>
+                </li>
+                <li>Navigate to <strong>Deploy a custom template</strong> in the Azure Portal.</li>
+                <li>Select <strong>Build your own template in the editor</strong>, paste the modified JSON, and click <strong>Save</strong>.</li>
+                <li>Select the <strong>az104-rg4</strong> resource group and region <strong>East US</strong>, then deploy.</li>
+                <li>Verify both VNets appear in the resource group after deployment.</li>
+              </ol>
+
+              <div class="info-box tip">
+                <strong>Tip</strong>
+                Using exported templates speeds up infrastructure replication and ensures consistency across environments.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 3 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t3">
+              <span class="task-number">3</span>
+              <h3>Configure ASG and NSG</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Create an application security group and a network security group with custom rules to control traffic flow.</p>
+
+              <ol class="steps">
+                <li>Navigate to <strong>Application security groups</strong> and create one named <strong>asg-web</strong> in <strong>az104-rg4</strong>.</li>
+                <li>Navigate to <strong>Network security groups</strong> and create one named <strong>myNSGSecure</strong> in <strong>az104-rg4</strong>.</li>
+                <li>Associate <strong>myNSGSecure</strong> with <strong>SharedServicesSubnet</strong> in CoreServicesVnet.</li>
+                <li>Create an <strong>inbound security rule</strong>:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Name</td><td>AllowASG</td></tr>
+                    <tr><td>Source</td><td>Application security group &mdash; asg-web</td></tr>
+                    <tr><td>Destination port ranges</td><td>80,443</td></tr>
+                    <tr><td>Protocol</td><td>TCP</td></tr>
+                    <tr><td>Action</td><td>Allow</td></tr>
+                    <tr><td>Priority</td><td>100</td></tr>
+                  </table>
+                </li>
+                <li>Create an <strong>outbound security rule</strong>:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Name</td><td>DenyInternetOutbound</td></tr>
+                    <tr><td>Destination</td><td>Internet</td></tr>
+                    <tr><td>Service</td><td>Custom (all ports)</td></tr>
+                    <tr><td>Action</td><td>Deny</td></tr>
+                    <tr><td>Priority</td><td>4096</td></tr>
+                  </table>
+                </li>
+                <li>Review the effective security rules to confirm the new rules appear alongside the defaults.</li>
+              </ol>
+
+              <div class="info-box warning">
+                <strong>Warning</strong>
+                The DenyInternetOutbound rule at priority 4096 blocks all outbound Internet traffic. This can prevent VMs from reaching external update servers or Azure services. Use with caution and add explicit allow rules for required traffic.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 4 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t4">
+              <span class="task-number">4</span>
+              <h3>Configure DNS Zones</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Set up public and private DNS zones and verify name resolution.</p>
+
+              <ol class="steps">
+                <li>Navigate to <strong>DNS zones</strong> and create a public zone:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Name</td><td>contoso.com</td></tr>
+                    <tr><td>Resource Group</td><td>az104-rg4</td></tr>
+                  </table>
+                </li>
+                <li>Add an <strong>A record</strong>: Name <strong>www</strong>, IP address <strong>10.1.1.4</strong>.</li>
+                <li>Verify the record with nslookup:
+                  <div class="code-block">
+                    <span class="lang-tag">CLI</span>
+                    nslookup www.contoso.com &lt;Azure-NS-server&gt;
+                  </div>
+                </li>
+                <li>Navigate to <strong>Private DNS zones</strong> and create a zone named <strong>private.contoso.com</strong>.</li>
+                <li>Add a <strong>Virtual network link</strong> to <strong>ManufacturingVnet</strong> (enable auto-registration if desired).</li>
+                <li>Add an <strong>A record</strong>: Name <strong>sensorvm</strong>, IP address <strong>10.1.1.4</strong>.</li>
+                <li>Verify the private record resolves from a VM within the linked VNet.</li>
+              </ol>
+
+              <div class="info-box note">
+                <strong>Note</strong>
+                Private DNS zones resolve only for resources within linked virtual networks. External queries will not return results for private records.
+              </div>
+            </div>
+          </div>
+
+          <!-- Key Takeaways -->
+          <div class="takeaways">
+            <h3>Key Takeaways</h3>
+            <ul>
+              <li>Virtual networks represent your cloud network infrastructure and isolate resources within Azure.</li>
+              <li>Avoiding overlapping IP address ranges across VNets reduces troubleshooting complexity when peering or connecting networks.</li>
+              <li>NSGs contain customizable allow/deny traffic rules that filter traffic at the subnet or NIC level.</li>
+              <li>Application Security Groups let you protect servers with common functions without managing individual IP addresses.</li>
+              <li>Azure DNS provides name resolution hosting for both public and private domains within your infrastructure.</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <!-- ==================== DEMO TAB ==================== -->
+        <div id="tab-demo" class="tab-content">
+
+          <h2 style="margin-bottom: 32px;">Demonstrations</h2>
+
+          <div class="task-block">
+            <div class="task-header">
+              <span class="task-number">1</span>
+              <h3>Creating Virtual Networks and Subnets</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Walk through creating a virtual network in the Azure Portal, demonstrating:</p>
+              <ol class="steps">
+                <li>Choosing an address space and understanding CIDR notation (e.g., /16 gives 65,536 addresses).</li>
+                <li>Adding multiple subnets and explaining how Azure reserves 5 addresses per subnet.</li>
+                <li>Reviewing the created VNet topology in the <strong>Diagram</strong> view.</li>
+                <li>Showing how to add a subnet after initial creation.</li>
+              </ol>
+              <div class="info-box tip">
+                <strong>Tip</strong>
+                Use the Network Watcher topology view to visualize VNet and subnet relationships, especially useful for complex environments.
+              </div>
+            </div>
+          </div>
+
+          <div class="task-block">
+            <div class="task-header">
+              <span class="task-number">2</span>
+              <h3>Configuring NSG Rules (Inbound/Outbound)</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Demonstrate the creation and behavior of NSG rules:</p>
+              <ol class="steps">
+                <li>Show the three default inbound rules (AllowVNetInBound, AllowAzureLoadBalancerInBound, DenyAllInBound) and their priorities.</li>
+                <li>Show the three default outbound rules (AllowVNetOutBound, AllowInternetOutBound, DenyAllOutBound).</li>
+                <li>Create a custom inbound rule to allow SSH on port 22 with priority 100.</li>
+                <li>Demonstrate rule evaluation order &mdash; lower priority numbers are evaluated first.</li>
+                <li>Associate the NSG with a subnet vs. a NIC and explain the difference.</li>
+              </ol>
+              <div class="info-box note">
+                <strong>Note</strong>
+                When an NSG is associated with both a subnet and a NIC, inbound traffic must pass both NSGs. Outbound traffic must also pass both, but in reverse order (NIC first, then subnet).
+              </div>
+            </div>
+          </div>
+
+          <div class="task-block">
+            <div class="task-header">
+              <span class="task-number">3</span>
+              <h3>Setting Up DNS Zones and Records</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Demonstrate both public and private DNS zone management:</p>
+              <ol class="steps">
+                <li>Create a public DNS zone and highlight the Azure-assigned name servers.</li>
+                <li>Add A, CNAME, and TXT records. Show the TTL settings.</li>
+                <li>Use <strong>nslookup</strong> to query records against the Azure name servers:
+                  <div class="code-block">
+                    <span class="lang-tag">CLI</span>
+                    nslookup www.contoso.com ns1-01.azure-dns.com
+                  </div>
+                </li>
+                <li>Create a private DNS zone and link it to a VNet.</li>
+                <li>Show auto-registration: when enabled, VMs in the linked VNet automatically get DNS records.</li>
+              </ol>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================== EXERCISES TAB ==================== -->
+        <div id="tab-exercises" class="tab-content">
+
+          <h2 style="margin-bottom: 32px;">Exercises</h2>
+
+          <!-- Exercise 1 -->
+          <div class="exercise-card">
+            <span class="difficulty easy">Easy</span>
+            <h4>Exercise 1: IP Address Planning</h4>
+            <ol>
+              <li>Given a company with 3 departments (HR: 50 hosts, Dev: 200 hosts, Ops: 30 hosts), design an address space.</li>
+              <li>Choose a /16 address space and create appropriately-sized subnets for each department.</li>
+              <li>Document the subnet ranges and usable host counts.</li>
+              <li>Verify no subnets overlap.</li>
+            </ol>
+            <div class="hint">
+              <strong>Show Hint</strong>
+              <div class="hint-text">A /24 gives 251 usable addresses, /25 gives 123, /26 gives 59, /27 gives 27. Remember that Azure reserves 5 addresses per subnet, so the usable count is 2^(32-prefix) - 5.</div>
+            </div>
+          </div>
+
+          <!-- Exercise 2 -->
+          <div class="exercise-card">
+            <span class="difficulty medium">Medium</span>
+            <h4>Exercise 2: NSG Rule Analysis</h4>
+            <ol>
+              <li>Create an NSG and review the default rules (priorities 65000&ndash;65500).</li>
+              <li>Create a rule allowing SSH (port 22) from your IP only, priority 100.</li>
+              <li>Create a rule denying all other SSH traffic, priority 200.</li>
+              <li>Create a rule allowing HTTP/HTTPS from anywhere, priority 300.</li>
+              <li>Walk through: What happens when traffic arrives on port 22 from a different IP? Why?</li>
+            </ol>
+            <div class="hint">
+              <strong>Show Hint</strong>
+              <div class="hint-text">NSG rules are processed in priority order (lowest number = highest priority). First match wins. Traffic on port 22 from a non-matching IP skips rule 100, hits the deny at 200, and is dropped before any later rules are evaluated.</div>
+            </div>
+          </div>
+
+          <!-- Exercise 3 -->
+          <div class="exercise-card">
+            <span class="difficulty hard">Hard</span>
+            <h4>Exercise 3: DNS Resolution Challenge</h4>
+            <ol>
+              <li>Create a public DNS zone for a domain you control (or use a test domain).</li>
+              <li>Add an A record, a CNAME record, and a TXT record.</li>
+              <li>Create a private DNS zone and link it to a VNet.</li>
+              <li>Add records to the private zone.</li>
+              <li>Test resolution: use nslookup for the public zone with Azure's nameservers.</li>
+              <li>Explain: Why can't you resolve private DNS records from outside the linked VNet?</li>
+            </ol>
+            <div class="hint">
+              <strong>Show Hint</strong>
+              <div class="hint-text">Private DNS zones only resolve for resources within linked virtual networks. They use Azure's internal DNS at 168.63.129.16, which is only accessible from within Azure VNets.</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================== PROVE IT TAB ==================== -->
+        <div id="tab-prove" class="tab-content">
+          <div class="prove-intro">
+            <h2>Prove You Know It</h2>
+            <p>Not memorization — understanding. Can you apply what you learned to real situations?</p>
+            <div class="score-display">Scenarios: <span class="quiz-score">No questions answered yet</span></div>
+          </div>
+
+          <div class="assess-section">
+            <div class="assess-section-title"><span class="assess-icon scenario">?</span> Quick Scenarios</div>
+
+            <div class="quiz-card" data-qid="q1" data-answer="B">
+              <div class="quiz-scenario">
+                <span class="scenario-label">Scenario</span>
+                <p>You created two VNets: 10.20.0.0/16 and 10.20.0.0/16 (same range). Can you peer them?</p>
+              </div>
+              <div class="quiz-options">
+                <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>Yes — Azure will handle routing between identical ranges</span></div>
+                <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>No — peered VNets cannot have overlapping address spaces</span></div>
+                <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>Yes — but only if they're in different regions</span></div>
+              </div>
+              <div class="quiz-explanation">
+                <div class="explanation-box why-right"><strong>Why this is correct</strong>Azure VNet peering requires non-overlapping address spaces. This is a hard requirement regardless of region. Plan your IP ranges carefully before creating VNets.</div>
+                <div class="explanation-box why-wrong"><strong>Common mistakes</strong>Azure cannot route between identical address spaces (A) — it wouldn't know which VNet to send traffic to. Region doesn't matter (C) — overlapping ranges are blocked in both local and global peering.</div>
+              </div>
+            </div>
+
+            <div class="quiz-card" data-qid="q2" data-answer="C">
+              <div class="quiz-scenario">
+                <span class="scenario-label">Scenario</span>
+                <p>You have an NSG with these inbound rules: Allow SSH (port 22) at priority 100, Deny All at priority 200. Web traffic on port 80 is being blocked. Why?</p>
+              </div>
+              <div class="quiz-options">
+                <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>The NSG is broken</span></div>
+                <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>SSH rules automatically block other ports</span></div>
+                <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>The "Deny All" rule at priority 200 is blocking port 80 before the default AllowVNetInBound rule (65000) can allow it</span></div>
+              </div>
+              <div class="quiz-explanation">
+                <div class="explanation-box why-right"><strong>Why this is correct</strong>NSG rules process in priority order (lowest number first). Your explicit Deny All at 200 fires before the default rules at 65000+. You need to add an Allow HTTP rule at a priority lower than 200 (like 150).</div>
+                <div class="explanation-box why-wrong"><strong>Common mistakes</strong>NSGs don't break (A) — they work exactly as configured. SSH rules don't affect other ports (B) — each rule is evaluated independently based on port and priority.</div>
+              </div>
+            </div>
+
+            <div class="quiz-card" data-qid="q3" data-answer="A">
+              <div class="quiz-scenario">
+                <span class="scenario-label">Scenario</span>
+                <p>You created a private DNS zone but VMs in your VNet can't resolve records from it. What's missing?</p>
+              </div>
+              <div class="quiz-options">
+                <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>The private DNS zone isn't linked to the VNet</span></div>
+                <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>You need a public IP on each VM</span></div>
+                <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>Private DNS zones only work with premium VNets</span></div>
+              </div>
+              <div class="quiz-explanation">
+                <div class="explanation-box why-right"><strong>Why this is correct</strong>Private DNS zones must be explicitly linked to each VNet that needs to resolve records. Without the link, the VNet's DNS resolver doesn't know about your zone.</div>
+                <div class="explanation-box why-wrong"><strong>Common mistakes</strong>Public IPs (B) are for internet-facing resources — private DNS is internal only. There's no such thing as "premium VNets" (C) — all VNets support private DNS zones.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="assess-section">
+            <div class="assess-section-title"><span class="assess-icon troubleshoot">!</span> Troubleshooting Spot</div>
+
+            <div class="trouble-card">
+              <span class="trouble-label">Troubleshoot</span>
+              <p class="trouble-situation">You associated an NSG with a subnet. You added a rule to allow HTTP on port 80 with priority 100 and action Allow. But web traffic still can't reach your VMs.</p>
+              <p class="trouble-question">What's going wrong?</p>
+              <div class="progressive-hints">
+                <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Hint 1</div><div class="prog-hint-content">Check if there's also an NSG on the VM's NIC — traffic must pass BOTH the subnet NSG and the NIC NSG.</div></div>
+                <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Hint 2</div><div class="prog-hint-content">Check the Source setting on your rule — if it's set to a specific IP or service tag, traffic from other sources will be denied.</div></div>
+                <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Answer</div><div class="prog-hint-content answer">Most likely there's a second NSG on the network interface. NSGs are evaluated independently at both subnet and NIC levels. Traffic must be allowed by BOTH. Check the NIC-level NSG and either add an allow rule there too, or remove the NIC NSG to rely solely on the subnet NSG.</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="assess-section">
+            <div class="assess-section-title"><span class="assess-icon architect">&#9670;</span> Architect's Corner</div>
+
+            <div class="architect-card" data-aid="a1" data-best="B">
+              <span class="architect-label">Design Decision</span>
+              <p class="architect-situation">You're designing the network for a company with web servers (public-facing), application servers (internal), and database servers (highly restricted). How do you structure your VNet?</p>
+              <div class="architect-options">
+                <div class="arch-option" data-value="A"><div class="arch-option-title">Option A</div><div class="arch-option-desc">One VNet, one subnet, use NSG rules to separate traffic. Simple layout, all security via NSG rules.</div></div>
+                <div class="arch-option" data-value="B"><div class="arch-option-title">Option B</div><div class="arch-option-desc">One VNet, three subnets (web, app, db), each with its own NSG. Network segmentation with defense in depth.</div></div>
+                <div class="arch-option" data-value="C"><div class="arch-option-title">Option C</div><div class="arch-option-desc">Three separate VNets, one per tier. Maximum isolation, requires peering for communication.</div></div>
+              </div>
+              <div class="architect-reveal"><strong>Why this is the best choice</strong>Three subnets in one VNet gives you segmentation without peering complexity. The web subnet NSG allows inbound HTTP/HTTPS from the internet. The app subnet only allows traffic from the web subnet. The db subnet only allows traffic from the app subnet on the database port. This is classic defense-in-depth. Option A works but one flat subnet makes it easier to misconfigure. Option C adds unnecessary peering overhead since these tiers need to communicate constantly.</div>
+            </div>
+          </div>
+
+          <button class="reset-quiz-btn">&#8635; Reset All Answers</button>
+        </div>
+
+      </div><!-- /tab-container -->
+
+      <nav class="module-nav">
+        <a href="03-resources.html" class="prev">
+          <span class="nav-direction">&larr; Previous Module</span>
+          <span class="nav-title">03: Azure Resources</span>
+        </a>
+        <a href="05-connectivity.html" class="next">
+          <span class="nav-direction">Next Module &rarr;</span>
+          <span class="nav-title">05: Intersite Connectivity</span>
+        </a>
+      </nav>
+
+    </div><!-- /module-content -->
+
+  </div><!-- /module-page -->
+
+  <footer class="site-footer">
+    <p>Built for the AZ-104 Azure Administrator certification. Lab content sourced from <a href="https://microsoftlearning.github.io/AZ-104-MicrosoftAzureAdministrator/" target="_blank">Microsoft Learning</a>.</p>
+  </footer>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

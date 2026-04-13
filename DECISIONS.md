@@ -55,7 +55,7 @@ Format:
 **Why:** Two reasons. (1) The questions likely originate from a VCE dump of Microsoft exam content, which is under Microsoft IP. Publishing them in a public GitHub repo under the user's name creates legal exposure that the user should explicitly opt into. (2) Even ignoring IP, 25MB of question data in the scaffold commit makes the initial history bloated. Better to land the engine first, then make a deliberate call on question bank handling.
 **Alternatives considered:** Commit the full AZ-104 bank now; commit obfuscated; keep private.
 **Reversible:** yes — adding the data later is trivial. Removing it from git history once public is not.
-**Status:** BLOCKS step 3 (engine extraction end-to-end test). User must decide on one of: (a) make repo private, (b) put question data under `.gitignore` and load from a local file path for dev only, (c) rewrite/paraphrase the questions to avoid direct copying, (d) ship without practice quiz content and link to the local file instead.
+**Status:** RESOLVED 2026-04-13 — user chose option (b): local-only tool. Question bank lives at `exams/<slug>/quiz-data.json` but is gitignored and never pushed to the remote. Tool runs via `python3 -m http.server` on the user's machine. The public GitHub scaffold repo stays public as free backup of the clean tool code.
 
 ## 2026-04-13 — Per-exam quiz-data split
 **Decision:** Split the 48MB `quiz-data.json` into `exams/<code>/quiz-data.json` (one file per exam). Never commit the full bundle.

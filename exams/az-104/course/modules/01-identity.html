@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 01: Administer Identity | AZ-104 Course</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%230078d4'/><text x='50' y='68' font-size='50' text-anchor='middle' fill='white' font-weight='bold'>Az</text></svg>">
+</head>
+<body data-module="m01">
+<div style="background:#0a0e1a;border-bottom:1px solid #1e293b;padding:10px 24px;font-size:0.85rem;font-family:system-ui,-apple-system,sans-serif;"><a href="../../index.html#course" style="color:#64748b;text-decoration:none;">&larr; Back to Pass Wizard AZ-104 hub</a></div>
+
+
+  <nav class="navbar">
+    <a href="../index.html" class="nav-brand">
+      <div class="logo">Az</div>
+      <span>AZ-104 Course</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html#modules">Modules</a></li>
+      <li><a href="https://microsoftlearning.github.io/AZ-104-MicrosoftAzureAdministrator/" target="_blank">Official Labs</a></li>
+    </ul>
+  </nav>
+
+  <section class="module-hero">
+    <div class="module-hero-content">
+      <div class="breadcrumb">
+        <a href="../index.html">AZ-104</a>
+        <span>/</span>
+        <span>Module 01</span>
+      </div>
+      <h1>Administer Identity</h1>
+      <p class="module-subtitle">Manage Microsoft Entra ID identities, create users and groups, and configure authentication for organizational access.</p>
+      <div class="meta-bar">
+        <div class="meta-item">
+          <span class="icon">&#128218;</span>
+          <span>Lab 01</span>
+        </div>
+        <div class="meta-item">
+          <span class="icon">&#127916;</span>
+          <span>Demo</span>
+        </div>
+        <div class="meta-item">
+          <span class="icon">&#9998;</span>
+          <span>3 Exercises</span>
+        </div>
+        <div class="meta-item">
+          <span class="icon">&#9201;</span>
+          <span>30 min</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="module-content">
+    <div class="tab-container">
+      <div class="tab-nav">
+        <button class="tab-btn active" data-tab="tab-lesson">Lesson</button>
+        <button class="tab-btn" data-tab="tab-lab">Lab</button>
+        <button class="tab-btn" data-tab="tab-demo">Demo</button>
+        <button class="tab-btn" data-tab="tab-exercises">Exercises</button>
+        <button class="tab-btn" data-tab="tab-prove">Prove It</button>
+      </div>
+
+      <!-- ==================== LESSON TAB ==================== -->
+      <div id="tab-lesson" class="tab-content active">
+
+        <div class="lesson-intro">
+          <h2>What You'll Learn</h2>
+          <p>This module covers Microsoft Entra ID (formerly Azure Active Directory) — the backbone of identity and access management in Azure. You'll understand how tenants, users, and groups work together to control who can access your cloud resources.</p>
+          <ul class="lesson-objectives">
+            <li>Understand what a tenant is and how it relates to your organization</li>
+            <li>Create and manage user accounts (internal and guest)</li>
+            <li>Create and manage groups for organized access control</li>
+            <li>Know the difference between Security and Microsoft 365 groups</li>
+          </ul>
+        </div>
+
+        <div class="concept-block">
+          <div class="concept-header">
+            <span class="concept-icon">&#128273;</span>
+            <h3>What is Microsoft Entra ID?</h3>
+          </div>
+          <div class="concept-body">
+            <p>Microsoft Entra ID is Microsoft's cloud-based identity and access management service. Think of it as the <strong>bouncer at the door</strong> of your Azure environment — it decides who gets in and what they can do.</p>
+            <p>Every Azure subscription is associated with a <strong>tenant</strong>. A tenant is a dedicated instance of Entra ID that represents your organization. When your company signs up for Azure, Microsoft 365, or any Microsoft cloud service, they get a tenant.</p>
+            <p><strong>Key things to understand:</strong></p>
+            <ul>
+              <li>A tenant is NOT the same as a subscription. One tenant can have multiple subscriptions.</li>
+              <li>Your tenant has a primary domain (like <span class="key-term">yourcompany.onmicrosoft.com</span>) and can have custom domains.</li>
+              <li>The tenant is the trust boundary — users in your tenant are "internal"; everyone else is "external."</li>
+            </ul>
+            <div class="real-world">In practice, your company likely already has a tenant from Microsoft 365. Azure uses the same tenant — so your employees already have identities that work in Azure.</div>
+          </div>
+        </div>
+
+        <div class="concept-block">
+          <div class="concept-header">
+            <span class="concept-icon">&#128100;</span>
+            <h3>User Accounts</h3>
+          </div>
+          <div class="concept-body">
+            <p>There are two types of users in Entra ID:</p>
+            <p><strong>Internal users</strong> (Members): These are people who belong to your organization. They authenticate directly with your tenant and have full access to directory features. You create them directly in Entra ID.</p>
+            <p><strong>Guest users</strong> (Guests): These are external people — contractors, partners, vendors — who you invite to your tenant. They authenticate with their OWN identity provider (their own company's Entra ID, a Microsoft account, Google, etc.) but get limited access to your resources.</p>
+            <p>Important properties for every user: Display name, User Principal Name (UPN — their login), Job title, Department, Usage location (required for licensing).</p>
+            <div class="info-box tip"><strong>Tip:</strong> Always set the Usage location when creating users. Without it, you can't assign licenses — and some features won't work.</div>
+          </div>
+        </div>
+
+        <div class="concept-block">
+          <div class="concept-header">
+            <span class="concept-icon">&#128101;</span>
+            <h3>Groups</h3>
+          </div>
+          <div class="concept-body">
+            <p>Groups let you manage access for multiple users at once instead of one at a time. There are two dimensions to understand:</p>
+            <p><strong>Group Type:</strong></p>
+            <ul>
+              <li><strong>Security groups</strong> — Used for managing access to resources (RBAC role assignments, app permissions)</li>
+              <li><strong>Microsoft 365 groups</strong> — Used for collaboration (shared mailbox, SharePoint, Teams)</li>
+            </ul>
+            <p><strong>Membership Type:</strong></p>
+            <ul>
+              <li><strong>Assigned</strong> — You manually add and remove members. Simple, works everywhere.</li>
+              <li><strong>Dynamic User</strong> — Members are automatically added/removed based on user attributes (like department = "Engineering"). Requires Entra ID Premium P1.</li>
+              <li><strong>Dynamic Device</strong> — Same concept but for devices.</li>
+            </ul>
+            <table class="compare-table">
+              <thead>
+                <tr><th>Feature</th><th>Assigned</th><th>Dynamic</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Management</td><td>Manual add/remove</td><td>Automatic via rules</td></tr>
+                <tr><td>License needed</td><td>Free tier</td><td>Premium P1</td></tr>
+                <tr><td>Best for</td><td>Small teams, specific access</td><td>Large orgs, attribute-based</td></tr>
+                <tr><td>Updates</td><td>Immediate</td><td>Rule evaluation delay</td></tr>
+              </tbody>
+            </table>
+            <div class="real-world">Most companies start with assigned groups and move to dynamic as they grow. At 50 users, manual management is fine. At 500, you want dynamic groups based on department and job title.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================== LAB TAB ==================== -->
+      <div id="tab-lab" class="tab-content">
+
+        <h2 style="margin-bottom: 8px;">Lab 01 - Manage Microsoft Entra ID Identities</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 32px;">
+          <strong>Scenario:</strong> Organizations need to provision user accounts and groups in Microsoft Entra ID to support authentication for engineering staff.
+        </p>
+
+        <!-- Task 1 -->
+        <div class="task-block">
+          <div class="task-header">
+            <input type="checkbox" class="completion-check" data-task="lab-t1">
+            <span class="task-number">1</span>
+            <h3>Create and Configure User Accounts</h3>
+            <span class="task-toggle">&#9660;</span>
+          </div>
+          <div class="task-body">
+            <p>Provision internal and external user accounts in Microsoft Entra ID with appropriate properties and roles.</p>
+            <ol class="steps">
+              <li>Access <strong>Microsoft Entra ID</strong> in the Azure portal.</li>
+              <li>Navigate to <strong>Users &gt; Create new user</strong>.</li>
+              <li>Configure the following settings:
+                <table class="config-table">
+                  <thead>
+                    <tr><th>Setting</th><th>Value</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>User principal name</td><td>az104-user1</td></tr>
+                    <tr><td>Display name</td><td>az104-user1</td></tr>
+                    <tr><td>Password</td><td>Auto-generated</td></tr>
+                    <tr><td>Account enabled</td><td>Yes</td></tr>
+                  </tbody>
+                </table>
+              </li>
+              <li>Configure additional properties:
+                <table class="config-table">
+                  <thead>
+                    <tr><th>Property</th><th>Value</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Job title</td><td>IT Lab Administrator</td></tr>
+                    <tr><td>Department</td><td>IT</td></tr>
+                    <tr><td>Usage location</td><td>United States</td></tr>
+                  </tbody>
+                </table>
+              </li>
+              <li>Invite an <strong>external user</strong> with the following details:
+                <table class="config-table">
+                  <thead>
+                    <tr><th>Property</th><th>Value</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Email</td><td>External email address</td></tr>
+                    <tr><td>Display name</td><td>External user name</td></tr>
+                    <tr><td>Job title</td><td>As appropriate</td></tr>
+                    <tr><td>Department</td><td>As appropriate</td></tr>
+                    <tr><td>Usage location</td><td>United States</td></tr>
+                  </tbody>
+                </table>
+              </li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Task 2 -->
+        <div class="task-block">
+          <div class="task-header">
+            <input type="checkbox" class="completion-check" data-task="lab-t2">
+            <span class="task-number">2</span>
+            <h3>Create Groups and Add Members</h3>
+            <span class="task-toggle">&#9660;</span>
+          </div>
+          <div class="task-body">
+            <p>Create a security group, assign ownership, and add members to manage group-based access.</p>
+            <ol class="steps">
+              <li>Access <strong>Groups</strong> in Microsoft Entra ID.</li>
+              <li>Create a new security group:
+                <table class="config-table">
+                  <thead>
+                    <tr><th>Setting</th><th>Value</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Group type</td><td>Security</td></tr>
+                    <tr><td>Group name</td><td>IT Lab Administrators</td></tr>
+                    <tr><td>Membership type</td><td>Assigned</td></tr>
+                  </tbody>
+                </table>
+              </li>
+              <li>Designate <strong>yourself as group owner</strong>.</li>
+              <li>Add <strong>az104-user1</strong> and the <strong>invited external user</strong> as members.</li>
+              <li>Verify the group creation and membership in the Groups blade.</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Key Takeaways -->
+        <div class="takeaways">
+          <h3>Key Takeaways</h3>
+          <ul>
+            <li>Tenants represent organizational instances for managing cloud service access.</li>
+            <li>User account types include internal and guest accounts with role-specific access.</li>
+            <li>Groups support both static (assigned) and dynamic membership models.</li>
+            <li>Security and Microsoft 365 are the primary group classifications.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ==================== DEMO TAB ==================== -->
+      <div id="tab-demo" class="tab-content">
+
+        <h2 style="margin-bottom: 8px;">Demo - Configure Entra ID Identities</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 32px;">Walk through the core Entra ID blades to explore tenant information, user management, and group configuration.</p>
+
+        <!-- Exercise 1 -->
+        <div class="task-block">
+          <div class="task-header">
+            <input type="checkbox" class="completion-check" data-task="demo-e1">
+            <span class="task-number">1</span>
+            <h3>Review License and Domain Information</h3>
+            <span class="task-toggle">&#9660;</span>
+          </div>
+          <div class="task-body">
+            <ol class="steps">
+              <li>Navigate to the <strong>Microsoft Entra ID</strong> blade in the Azure portal.</li>
+              <li>Examine the <strong>Overview</strong> page to review tenant information, including licensing details and the primary domain.</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Exercise 2 -->
+        <div class="task-block">
+          <div class="task-header">
+            <input type="checkbox" class="completion-check" data-task="demo-e2">
+            <span class="task-number">2</span>
+            <h3>Explore User Accounts</h3>
+            <span class="task-toggle">&#9660;</span>
+          </div>
+          <div class="task-body">
+            <ol class="steps">
+              <li>Access the <strong>Users</strong> blade in Microsoft Entra ID.</li>
+              <li>Compare the options for <strong>"New user"</strong> vs <strong>"New guest user"</strong> to understand the differences.</li>
+              <li>Create a new user and review the available sections: <strong>Identity</strong>, <strong>Groups</strong>, <strong>Roles</strong>, <strong>Settings</strong>, and <strong>Job info</strong>.</li>
+              <li>Review additional management features: <strong>password reset</strong>, <strong>user deletion</strong>, and <strong>sign-in logs</strong>.</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Exercise 3 -->
+        <div class="task-block">
+          <div class="task-header">
+            <input type="checkbox" class="completion-check" data-task="demo-e3">
+            <span class="task-number">3</span>
+            <h3>Explore Group Accounts</h3>
+            <span class="task-toggle">&#9660;</span>
+          </div>
+          <div class="task-body">
+            <ol class="steps">
+              <li>Navigate to the <strong>Groups</strong> blade in Microsoft Entra ID.</li>
+              <li>Create a new group or review an existing group.</li>
+              <li>Examine the <strong>membership type</strong> options (Assigned vs Dynamic) and <strong>group type</strong> classifications (Security vs Microsoft 365).</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== EXERCISES TAB ==================== -->
+      <div id="tab-exercises" class="tab-content">
+
+        <h2 style="margin-bottom: 8px;">Exercises</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 32px;">Reinforce your understanding of Entra ID identities with these hands-on exercises.</p>
+
+        <!-- Exercise 1 -->
+        <div class="exercise-card">
+          <span class="difficulty easy">Easy</span>
+          <h4>Exercise 1: Identity Audit</h4>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 12px;">You've been asked to audit your organization's Entra ID tenant.</p>
+          <ol>
+            <li>Navigate to Entra ID and document the primary domain name.</li>
+            <li>Check how many licensed users exist.</li>
+            <li>List all user accounts and identify which are internal vs guest.</li>
+            <li>Document which users have admin roles assigned.</li>
+          </ol>
+          <div class="hint">
+            <strong>Hint</strong> (click to reveal)
+            <div class="hint-text">The Overview blade shows tenant info. User properties show account type.</div>
+          </div>
+        </div>
+
+        <!-- Exercise 2 -->
+        <div class="exercise-card">
+          <span class="difficulty medium">Medium</span>
+          <h4>Exercise 2: User Lifecycle Management</h4>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 12px;">Create a complete user onboarding and offboarding workflow.</p>
+          <ol>
+            <li>Create a new user <strong>"test-engineer1"</strong> with job title "QA Engineer", department "Engineering".</li>
+            <li>Create a security group <strong>"QA Team"</strong> and add the user.</li>
+            <li>Verify the user can be found in the directory.</li>
+            <li>Disable the user account (simulating offboarding).</li>
+            <li>Delete the user and verify they appear in <strong>Deleted users</strong>.</li>
+          </ol>
+          <div class="hint">
+            <strong>Hint</strong> (click to reveal)
+            <div class="hint-text">Deleted users can be restored within 30 days from the Deleted users blade.</div>
+          </div>
+        </div>
+
+        <!-- Exercise 3 -->
+        <div class="exercise-card">
+          <span class="difficulty hard">Hard</span>
+          <h4>Exercise 3: Group-Based Access Design</h4>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 12px;">Design a group structure for a company with Engineering, Sales, and Support departments.</p>
+          <ol>
+            <li>Create three security groups, one per department.</li>
+            <li>Create two users per department with appropriate job titles.</li>
+            <li>Add users to their respective groups.</li>
+            <li>Create a cross-functional group <strong>"All Staff"</strong> containing all users.</li>
+            <li>Verify membership counts for each group.</li>
+            <li>Consider: What would change if you used dynamic groups instead of assigned?</li>
+          </ol>
+          <div class="hint">
+            <strong>Hint</strong> (click to reveal)
+            <div class="hint-text">Dynamic groups require Entra ID Premium P1. They auto-populate based on user attributes like department.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================== PROVE IT TAB ==================== -->
+      <div id="tab-prove" class="tab-content">
+        <div class="prove-intro">
+          <h2>Prove You Know It</h2>
+          <p>Not memorization — understanding. Can you apply what you learned to real situations?</p>
+          <div class="score-display">Scenarios: <span class="quiz-score">No questions answered yet</span></div>
+        </div>
+
+        <div class="assess-section">
+          <div class="assess-section-title"><span class="assess-icon scenario">?</span> Quick Scenarios</div>
+
+          <div class="quiz-card" data-qid="q1" data-answer="B">
+            <div class="quiz-scenario">
+              <span class="scenario-label">Scenario</span>
+              <p>A new contractor needs access to your Azure portal for 3 months. They have their own email. How do you add them?</p>
+            </div>
+            <div class="quiz-options">
+              <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>Create a new user with your domain</span></div>
+              <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>Invite as external guest user</span></div>
+              <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>Share your admin credentials</span></div>
+            </div>
+            <div class="quiz-explanation">
+              <div class="explanation-box why-right"><strong>Why this is correct</strong>Guest users are the right approach for external people — they authenticate with their own identity provider. Creating a domain user would give them a permanent internal identity they don't need.</div>
+              <div class="explanation-box why-wrong"><strong>Common mistakes</strong>Creating a domain user (A) gives a permanent internal identity — overkill for a 3-month contractor. Sharing credentials (C) violates zero-trust principles and makes auditing impossible.</div>
+            </div>
+          </div>
+
+          <div class="quiz-card" data-qid="q2" data-answer="C">
+            <div class="quiz-scenario">
+              <span class="scenario-label">Scenario</span>
+              <p>Your company wants groups that automatically add new Marketing department hires. What do you need?</p>
+            </div>
+            <div class="quiz-options">
+              <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>A Microsoft 365 group with assigned membership</span></div>
+              <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>A security group and a PowerShell script</span></div>
+              <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>An Entra ID Premium P1 license and a dynamic security group</span></div>
+            </div>
+            <div class="quiz-explanation">
+              <div class="explanation-box why-right"><strong>Why this is correct</strong>Dynamic groups auto-populate based on user attributes like department. This requires P1 licensing. It's the Azure-native, zero-maintenance solution.</div>
+              <div class="explanation-box why-wrong"><strong>Common mistakes</strong>Assigned groups (A) require manual updates every time someone joins or leaves. A PowerShell script (B) works but isn't the Azure-native solution and requires maintenance.</div>
+            </div>
+          </div>
+
+          <div class="quiz-card" data-qid="q3" data-answer="A">
+            <div class="quiz-scenario">
+              <span class="scenario-label">Scenario</span>
+              <p>You deleted a user yesterday. Your manager says they need to be reinstated. What do you do?</p>
+            </div>
+            <div class="quiz-options">
+              <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>Restore them from the Deleted users blade within 30 days</span></div>
+              <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>Create a new user with the same name</span></div>
+              <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>Contact Microsoft support to recover the account</span></div>
+            </div>
+            <div class="quiz-explanation">
+              <div class="explanation-box why-right"><strong>Why this is correct</strong>Deleted users are soft-deleted and can be restored within 30 days with all properties intact. This preserves group memberships, role assignments, and audit history.</div>
+              <div class="explanation-box why-wrong"><strong>Common mistakes</strong>Creating a new user (B) would lose group memberships, role assignments, and audit history. Microsoft support (C) is unnecessary — you can self-service this in the portal.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="assess-section">
+          <div class="assess-section-title"><span class="assess-icon troubleshoot">!</span> Troubleshooting Spot</div>
+
+          <div class="trouble-card">
+            <span class="trouble-label">Troubleshoot</span>
+            <p class="trouble-situation">You invited a guest user but they say they never received the invitation email. The user appears in your directory with status "Pending acceptance".</p>
+            <p class="trouble-question">What should you check?</p>
+            <div class="progressive-hints">
+              <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Hint 1</div><div class="prog-hint-content">Check if the email address was entered correctly in the invitation.</div></div>
+              <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Hint 2</div><div class="prog-hint-content">Ask the guest to check their spam/junk folder — Azure invitation emails sometimes get filtered.</div></div>
+              <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Answer</div><div class="prog-hint-content answer">You can resend the invitation from the user's profile. Navigate to the guest user > click "Resend invitation." Also verify their email doesn't have a typo. If the org blocks external emails, they may need to whitelist microsoft-noreply@microsoft.com.</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="assess-section">
+          <div class="assess-section-title"><span class="assess-icon architect">&#9670;</span> Architect's Corner</div>
+
+          <div class="architect-card" data-aid="a1" data-best="B">
+            <span class="architect-label">Design Decision</span>
+            <p class="architect-situation">Your company has 500 employees across 8 departments. You need to manage access to Azure resources by department. How do you structure groups?</p>
+            <div class="architect-options">
+              <div class="arch-option" data-value="A"><div class="arch-option-title">Option A</div><div class="arch-option-desc">Create one large "All Employees" group and assign permissions per resource. Simple to set up, one group to manage.</div></div>
+              <div class="arch-option" data-value="B"><div class="arch-option-title">Option B</div><div class="arch-option-desc">Create a dynamic security group per department based on the department attribute. Auto-populates as users join/leave, requires P1.</div></div>
+              <div class="arch-option" data-value="C"><div class="arch-option-title">Option C</div><div class="arch-option-desc">Create nested static groups — department groups inside a master group. Manual membership, supports group nesting.</div></div>
+            </div>
+            <div class="architect-reveal"><strong>Why this is the best choice</strong>Dynamic groups per department scale automatically. When HR updates a user's department attribute, group membership adjusts without admin intervention. Option A gives everyone the same access (violates least privilege). Option C works but requires manual maintenance that becomes error-prone at 500+ users.</div>
+          </div>
+        </div>
+
+        <button class="reset-quiz-btn">&#8635; Reset All Answers</button>
+      </div>
+
+    </div>
+
+    <nav class="module-nav">
+      <a href="02-governance.html" class="next">
+        <span class="nav-direction">Next Module &rarr;</span>
+        <span class="nav-title">02: Governance &amp; Compliance</span>
+      </a>
+    </nav>
+
+  </div>
+
+  <footer class="site-footer">
+    <p>Built for the AZ-104 Azure Administrator certification. Lab content sourced from <a href="https://microsoftlearning.github.io/AZ-104-MicrosoftAzureAdministrator/" target="_blank">Microsoft Learning</a>.</p>
+  </footer>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

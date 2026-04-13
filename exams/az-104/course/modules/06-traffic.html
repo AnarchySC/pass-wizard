@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 06: Administer Network Traffic Management | AZ-104</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%230078d4'/><text x='50' y='68' font-size='50' text-anchor='middle' fill='white' font-weight='bold'>Az</text></svg>">
+</head>
+<body data-module="m06">
+<div style="background:#0a0e1a;border-bottom:1px solid #1e293b;padding:10px 24px;font-size:0.85rem;font-family:system-ui,-apple-system,sans-serif;"><a href="../../index.html#course" style="color:#64748b;text-decoration:none;">&larr; Back to Pass Wizard AZ-104 hub</a></div>
+
+
+  <nav class="navbar">
+    <a href="../index.html" class="nav-brand">
+      <div class="logo">Az</div>
+      <span>AZ-104 Course</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html#modules">Modules</a></li>
+      <li><a href="https://microsoftlearning.github.io/AZ-104-MicrosoftAzureAdministrator/" target="_blank">Official Labs</a></li>
+    </ul>
+  </nav>
+
+  <div class="module-page">
+
+    <section class="module-hero">
+      <div class="module-hero-content">
+        <div class="breadcrumb">
+          <a href="../index.html">AZ-104</a>
+          <span>/</span>
+          <span>Module 06</span>
+        </div>
+        <h1>Administer Network Traffic Management</h1>
+        <p class="module-subtitle">Configure Azure Load Balancer and Application Gateway to distribute and manage network traffic across backend pools.</p>
+        <div class="meta-bar">
+          <div class="meta-item">
+            <span class="icon">&#9776;</span>
+            <span>Lab 06</span>
+          </div>
+          <div class="meta-item">
+            <span class="icon">&#9654;</span>
+            <span>Demo</span>
+          </div>
+          <div class="meta-item">
+            <span class="icon">&#9998;</span>
+            <span>3 Exercises</span>
+          </div>
+          <div class="meta-item">
+            <span class="icon">&#9200;</span>
+            <span>50 min</span>
+          </div>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar" style="width: 0%"></div>
+        </div>
+        <span class="progress-label" style="font-size:0.8rem; color:var(--text-muted); margin-top:6px; display:inline-block;">0/3 completed</span>
+      </div>
+    </section>
+
+    <div class="module-content">
+      <div class="tab-container">
+        <div class="tab-nav">
+          <button class="tab-btn active" data-tab="tab-lesson">Lesson</button>
+          <button class="tab-btn" data-tab="tab-lab">Lab</button>
+          <button class="tab-btn" data-tab="tab-demo">Demo</button>
+          <button class="tab-btn" data-tab="tab-exercises">Exercises</button>
+          <button class="tab-btn" data-tab="tab-prove">Prove It</button>
+        </div>
+
+        <!-- ==================== LESSON TAB ==================== -->
+        <div id="tab-lesson" class="tab-content active">
+
+          <div class="lesson-intro">
+            <h2>What You'll Learn</h2>
+            <p>When your app runs on multiple VMs, you need to distribute traffic between them. This module covers Azure's two main traffic distribution services: Load Balancer (Layer 4) and Application Gateway (Layer 7).</p>
+            <ul class="lesson-objectives">
+              <li>Understand the difference between L4 and L7 load balancing</li>
+              <li>Configure Azure Load Balancer with frontend, backend pool, and health probes</li>
+              <li>Configure Application Gateway with path-based routing</li>
+              <li>Know when to use each service</li>
+            </ul>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#128209;</span>
+              <h3>Layer 4 vs Layer 7</h3>
+            </div>
+            <div class="concept-body">
+              <p>Network traffic operates in layers. The two that matter here:</p>
+              <p><strong>Layer 4 (Transport)</strong> &mdash; TCP and UDP. The load balancer sees IP addresses and port numbers, but NOT the content of the request. It can't tell the difference between a request for <span class="key-term">/images/cat.jpg</span> and <span class="key-term">/api/users</span>.</p>
+              <p><strong>Layer 7 (Application)</strong> &mdash; HTTP/HTTPS. The load balancer can inspect URLs, headers, cookies, and route based on the actual content of the request.</p>
+              <table class="compare-table">
+                <thead>
+                  <tr><th>Feature</th><th>Load Balancer (L4)</th><th>Application Gateway (L7)</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>OSI Layer</td><td>4 (Transport)</td><td>7 (Application)</td></tr>
+                  <tr><td>Protocols</td><td>TCP, UDP</td><td>HTTP, HTTPS, WebSocket</td></tr>
+                  <tr><td>Routing</td><td>IP + Port only</td><td>URL path, host header, cookies</td></tr>
+                  <tr><td>SSL termination</td><td>No</td><td>Yes</td></tr>
+                  <tr><td>WAF</td><td>No</td><td>Optional (WAF tier)</td></tr>
+                  <tr><td>Performance</td><td>Ultra-fast (no inspection)</td><td>Slightly slower (inspects content)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#9878;</span>
+              <h3>Azure Load Balancer</h3>
+            </div>
+            <div class="concept-body">
+              <p>Azure Load Balancer distributes incoming traffic across a pool of backend VMs. It has four components:</p>
+              <ol>
+                <li><strong>Frontend IP</strong> &mdash; The public or private IP that receives traffic</li>
+                <li><strong>Backend Pool</strong> &mdash; The VMs that handle the traffic</li>
+                <li><strong>Health Probe</strong> &mdash; Checks if each VM is alive (TCP or HTTP)</li>
+                <li><strong>Load Balancing Rule</strong> &mdash; Maps a frontend port to a backend port</li>
+              </ol>
+              <p>Important: Standard SKU Load Balancers <strong>block all traffic by default</strong>. You MUST have NSG rules that explicitly allow traffic, unlike Basic SKU which allows everything.</p>
+              <div class="real-world">
+                <strong>Real-World:</strong> Use Standard SKU for production. Basic is being retired and doesn't support Availability Zones, multiple frontend IPs, or SLA guarantees.
+              </div>
+            </div>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#128295;</span>
+              <h3>Azure Application Gateway</h3>
+            </div>
+            <div class="concept-body">
+              <p>Application Gateway is a Layer 7 load balancer designed for web applications. Its killer features:</p>
+              <p><strong>Path-based routing:</strong> Send <span class="key-term">/api/*</span> requests to API servers and <span class="key-term">/images/*</span> to image servers &mdash; from the same frontend IP.</p>
+              <p><strong>SSL termination:</strong> HTTPS traffic is decrypted at the gateway, so backend servers only handle HTTP (simpler, faster).</p>
+              <p><strong>WAF (Web Application Firewall):</strong> The WAF tier adds protection against SQL injection, XSS, and other OWASP top-10 attacks.</p>
+              <p>Requirements:</p>
+              <ul>
+                <li>Needs its own <strong>dedicated subnet</strong> (/27 or larger)</li>
+                <li>Supports autoscaling (Standard V2 tier)</li>
+                <li>Supports multiple backend pools with different routing rules</li>
+              </ul>
+              <div class="diagram-box">
+<pre>Users &rarr; [App Gateway :80/:443]
+         &boxur;&boxh;&boxh; /api/*    &rarr; Backend Pool: API Servers
+         &boxur;&boxh;&boxh; /images/* &rarr; Backend Pool: Image Servers
+         &boxur;&boxh;&boxh; /*        &rarr; Backend Pool: Web Servers</pre>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================== LAB TAB ==================== -->
+        <div id="tab-lab" class="tab-content">
+
+          <h2 style="margin-bottom: 8px;">Lab 06 &mdash; Implement Network Traffic Management</h2>
+          <p style="color: var(--text-muted); margin-bottom: 32px;">Estimated time: 50 minutes</p>
+
+          <!-- Task 1 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t1">
+              <span class="task-number">1</span>
+              <h3>Deploy Infrastructure via Template</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Deploy the lab infrastructure using an ARM template that creates one virtual network with three subnets, each containing a virtual machine.</p>
+
+              <ol class="steps">
+                <li>Navigate to <strong>Deploy a custom template</strong> in the Azure Portal.</li>
+                <li>Select <strong>Build your own template in the editor</strong>.</li>
+                <li>Load the template file <strong>az104-06-vms-template.json</strong> and click <strong>Save</strong>.</li>
+                <li>Click <strong>Edit parameters</strong> and load the corresponding parameters file, then click <strong>Save</strong>.</li>
+                <li>Configure deployment settings:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Resource Group</td><td>az104-rg6 (create new)</td></tr>
+                    <tr><td>Region</td><td>East US</td></tr>
+                  </table>
+                </li>
+                <li>Click <strong>Review + create</strong>, then <strong>Create</strong>.</li>
+                <li>Wait for deployment to complete. Verify the resource group contains:
+                  <ul>
+                    <li>1 VNet with 3 subnets</li>
+                    <li>3 virtual machines (one per subnet)</li>
+                    <li>Associated NICs, disks, and public IPs</li>
+                  </ul>
+                </li>
+              </ol>
+
+              <div class="info-box note">
+                <strong>Note</strong>
+                The template deploys VMs with IIS installed via a custom script extension. This allows you to test load balancing by browsing to the backend VMs and seeing their hostnames in the "Hello World" response.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 2 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t2">
+              <span class="task-number">2</span>
+              <h3>Configure Azure Load Balancer</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Create a public Azure Load Balancer to distribute Layer 4 traffic across two backend VMs.</p>
+
+              <ol class="steps">
+                <li>Navigate to <strong>Load balancers</strong> and click <strong>+ Create</strong>.</li>
+                <li>Configure the load balancer:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Resource Group</td><td>az104-rg6</td></tr>
+                    <tr><td>Name</td><td>az104-lb</td></tr>
+                    <tr><td>SKU</td><td>Standard</td></tr>
+                    <tr><td>Type</td><td>Public</td></tr>
+                    <tr><td>Tier</td><td>Regional</td></tr>
+                  </table>
+                </li>
+                <li>Configure the <strong>Frontend IP</strong>:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Name</td><td>az104-fe</td></tr>
+                    <tr><td>Public IP</td><td>az104-lbpip (create new, static)</td></tr>
+                  </table>
+                </li>
+                <li>Configure the <strong>Backend pool</strong>:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Name</td><td>az104-be</td></tr>
+                    <tr><td>Virtual network</td><td>(select lab VNet)</td></tr>
+                    <tr><td>Members</td><td>vm0, vm1</td></tr>
+                  </table>
+                </li>
+                <li>Configure the <strong>Load balancing rule</strong>:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Name</td><td>az104-lbrule</td></tr>
+                    <tr><td>Frontend IP</td><td>az104-fe</td></tr>
+                    <tr><td>Backend pool</td><td>az104-be</td></tr>
+                    <tr><td>Port</td><td>80</td></tr>
+                    <tr><td>Backend port</td><td>80</td></tr>
+                    <tr><td>Health probe</td><td>az104-hp (create new)</td></tr>
+                  </table>
+                </li>
+                <li>Configure the <strong>Health probe</strong>:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Name</td><td>az104-hp</td></tr>
+                    <tr><td>Protocol</td><td>TCP</td></tr>
+                    <tr><td>Port</td><td>80</td></tr>
+                    <tr><td>Interval</td><td>5 seconds</td></tr>
+                  </table>
+                </li>
+                <li>Click <strong>Review + create</strong>, then <strong>Create</strong>.</li>
+                <li>After deployment, navigate to the load balancer and note the <strong>Frontend public IP address</strong>.</li>
+                <li>Open the frontend IP in a browser. You should see a "Hello World" page displaying the VM hostname.</li>
+                <li>Refresh several times &mdash; observe the hostname alternating between <strong>vm0</strong> and <strong>vm1</strong>, confirming load balancing.</li>
+              </ol>
+
+              <div class="info-box tip">
+                <strong>Tip</strong>
+                If you always see the same VM, try using an incognito/private window or clearing your browser cache. Session persistence settings can affect which backend serves each request.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 3 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t3">
+              <span class="task-number">3</span>
+              <h3>Configure Azure Application Gateway</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Create an Application Gateway with path-based routing to direct HTTP traffic to different backend pools based on URL paths.</p>
+
+              <ol class="steps">
+                <li>First, create a new subnet for the Application Gateway:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Subnet name</td><td>subnet-appgw</td></tr>
+                    <tr><td>Address range</td><td>10.60.3.224/27</td></tr>
+                  </table>
+                </li>
+                <li>Navigate to <strong>Application Gateways</strong> and click <strong>+ Create</strong>.</li>
+                <li>Configure the basics:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Name</td><td>az104-appgw</td></tr>
+                    <tr><td>Resource Group</td><td>az104-rg6</td></tr>
+                    <tr><td>Tier</td><td>Standard V2</td></tr>
+                    <tr><td>Autoscaling</td><td>No</td></tr>
+                    <tr><td>Instance count</td><td>2</td></tr>
+                    <tr><td>Subnet</td><td>subnet-appgw</td></tr>
+                  </table>
+                </li>
+                <li>Configure the <strong>Frontend</strong>:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Frontend IP type</td><td>Public</td></tr>
+                    <tr><td>Public IP</td><td>az104-gwpip (create new)</td></tr>
+                  </table>
+                </li>
+                <li>Add <strong>Backend pools</strong>:
+                  <table class="config-table">
+                    <tr><th>Pool Name</th><th>Members</th></tr>
+                    <tr><td>az104-appgwbe</td><td>vm1, vm2</td></tr>
+                    <tr><td>az104-imagebe</td><td>vm1</td></tr>
+                    <tr><td>az104-videobe</td><td>vm2</td></tr>
+                  </table>
+                </li>
+                <li>Configure a <strong>Routing rule</strong> with path-based routing:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Rule name</td><td>az104-routing</td></tr>
+                    <tr><td>Listener</td><td>HTTP on port 80</td></tr>
+                    <tr><td>Default backend pool</td><td>az104-appgwbe</td></tr>
+                    <tr><td>Path: /image/*</td><td>az104-imagebe</td></tr>
+                    <tr><td>Path: /video/*</td><td>az104-videobe</td></tr>
+                  </table>
+                </li>
+                <li>Click <strong>Review + create</strong>, then <strong>Create</strong>. Deployment may take 15&ndash;20 minutes.</li>
+                <li>After deployment, note the Application Gateway's <strong>Frontend public IP</strong>.</li>
+                <li>Test the path-based routing in your browser:
+                  <div class="code-block">
+                    <span class="lang-tag">URL</span>
+                    http://&lt;gateway-ip&gt;/image/
+http://&lt;gateway-ip&gt;/video/
+http://&lt;gateway-ip&gt;/
+                  </div>
+                </li>
+                <li>Verify that each path routes to the expected backend pool.</li>
+              </ol>
+
+              <div class="info-box warning">
+                <strong>Warning</strong>
+                Application Gateway requires a dedicated subnet with no other resources. The subnet must be large enough for the instance count. A /27 (32 addresses) is the minimum recommended size.
+              </div>
+            </div>
+          </div>
+
+          <!-- Key Takeaways -->
+          <div class="takeaways">
+            <h3>Key Takeaways</h3>
+            <ul>
+              <li>Azure Load Balancer distributes traffic at Layer 4 (TCP/UDP) using hash-based distribution across backend pool members.</li>
+              <li>Azure Application Gateway manages traffic at Layer 7 (HTTP/HTTPS) with URL path-based routing and content-aware features.</li>
+              <li>Public load balancers distribute internet traffic; internal load balancers distribute traffic within a VNet.</li>
+              <li>Path-based routing enables directing requests to content-specific backend pools based on URL patterns.</li>
+              <li>The WAF tier on Application Gateway adds protection against common web vulnerabilities and malicious traffic filtering.</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <!-- ==================== DEMO TAB ==================== -->
+        <div id="tab-demo" class="tab-content">
+
+          <h2 style="margin-bottom: 32px;">Demonstrations</h2>
+
+          <div class="task-block">
+            <div class="task-header">
+              <span class="task-number">1</span>
+              <h3>Load Balancer Creation and Configuration</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Walk through creating a Load Balancer in the Azure Portal, demonstrating:</p>
+              <ol class="steps">
+                <li>Use the <strong>"Help me choose"</strong> wizard to understand which load balancing solution fits your scenario.</li>
+                <li>Explain the <strong>SKU</strong> options: Basic (free, limited features) vs Standard (SLA-backed, zone-redundant).</li>
+                <li>Explain the <strong>Type</strong> options: Public (internet-facing) vs Internal (private VNet traffic).</li>
+                <li>Explain the <strong>Tier</strong> options: Regional (single region) vs Global (cross-region).</li>
+                <li>Configure the <strong>Frontend IP</strong> &mdash; show the difference between static and dynamic allocation.</li>
+                <li>Add VMs to a <strong>Backend pool</strong> and explain NIC-based vs IP-based configuration.</li>
+                <li>Create <strong>Inbound rules</strong>: load balancing rules, inbound NAT rules, and outbound rules.</li>
+                <li>Configure a <strong>Health probe</strong> and explain how unhealthy VMs are automatically removed from rotation.</li>
+              </ol>
+              <div class="info-box tip">
+                <strong>Tip</strong>
+                Standard SKU load balancers are secure by default &mdash; backend pool members must have an NSG allowing traffic, unlike Basic SKU which allows all traffic by default.
+              </div>
+            </div>
+          </div>
+
+          <div class="task-block">
+            <div class="task-header">
+              <span class="task-number">2</span>
+              <h3>Application Gateway Configuration</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Demonstrate the Application Gateway setup and its Layer 7 capabilities:</p>
+              <ol class="steps">
+                <li>Explain the <strong>Tier</strong> options: Standard V2 (routing only) vs WAF V2 (routing + web application firewall).</li>
+                <li>Show <strong>Frontend</strong> configuration: public IP, private IP, or both.</li>
+                <li>Configure <strong>Backend pools</strong> with different target types: VMs, VMSS, App Services, IP addresses, or FQDN.</li>
+                <li>Create <strong>HTTP Settings</strong>: port, protocol, cookie-based affinity, connection draining, request timeout.</li>
+                <li>Configure <strong>Listeners</strong>: basic (single site) vs multi-site listeners.</li>
+                <li>Set up <strong>Routing rules</strong>: basic routing vs path-based routing.</li>
+                <li>Demonstrate path-based routing with multiple backend pools for different URL paths.</li>
+              </ol>
+              <div class="info-box note">
+                <strong>Note</strong>
+                Application Gateway V2 supports autoscaling, zone redundancy, and static VIP &mdash; all improvements over V1. New deployments should always use V2.
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================== EXERCISES TAB ==================== -->
+        <div id="tab-exercises" class="tab-content">
+
+          <h2 style="margin-bottom: 32px;">Exercises</h2>
+
+          <!-- Exercise 1 -->
+          <div class="exercise-card">
+            <span class="difficulty easy">Easy</span>
+            <h4>Exercise 1: Load Balancer Health Check</h4>
+            <ol>
+              <li>Navigate to an existing Load Balancer in the Azure Portal.</li>
+              <li>Check the <strong>Backend pool</strong> health status.</li>
+              <li>Review the health probe configuration: protocol, port, and interval.</li>
+              <li>Identify: What happens to traffic if one backend VM goes down?</li>
+            </ol>
+            <div class="hint">
+              <strong>Show Hint</strong>
+              <div class="hint-text">The health probe continuously checks backend health at the configured interval. When a VM fails the probe threshold, it is automatically removed from rotation. Traffic is distributed only to healthy VMs until the unhealthy VM recovers and passes probes again.</div>
+            </div>
+          </div>
+
+          <!-- Exercise 2 -->
+          <div class="exercise-card">
+            <span class="difficulty medium">Medium</span>
+            <h4>Exercise 2: Load Balancing Comparison</h4>
+            <ol>
+              <li>Review Azure's <strong>"Load balancing &mdash; help me choose"</strong> tool in the portal.</li>
+              <li>Compare: When would you use Load Balancer vs Application Gateway vs Traffic Manager vs Front Door?</li>
+              <li>Create a table documenting: OSI layer, protocol support, global vs regional, and key features for each service.</li>
+              <li>For your current lab setup, justify which load balancing solution fits best.</li>
+            </ol>
+            <div class="hint">
+              <strong>Show Hint</strong>
+              <div class="hint-text">Load Balancer = Layer 4 regional (TCP/UDP hash-based distribution). Application Gateway = Layer 7 regional (HTTP path-based routing, SSL termination, WAF). Traffic Manager = DNS-based global (geographic/performance/priority routing). Front Door = Layer 7 global (CDN + WAF + global load balancing + SSL offload).</div>
+            </div>
+          </div>
+
+          <!-- Exercise 3 -->
+          <div class="exercise-card">
+            <span class="difficulty hard">Hard</span>
+            <h4>Exercise 3: Path-Based Routing Design</h4>
+            <p>Design an Application Gateway configuration for an e-commerce site with these requirements:</p>
+            <ol>
+              <li>Main site at <strong>/</strong> serves from a pool of 3 web servers.</li>
+              <li><strong>/api/*</strong> routes to 2 API servers.</li>
+              <li><strong>/static/*</strong> routes to a storage-backed pool.</li>
+              <li><strong>/admin/*</strong> should only be accessible from the internal network (10.0.0.0/8).</li>
+              <li>Draw or document the complete configuration: listeners, rules, backend pools, and health probes.</li>
+              <li>Explain: How would you add SSL termination to this setup?</li>
+            </ol>
+            <div class="hint">
+              <strong>Show Hint</strong>
+              <div class="hint-text">You would need 4 backend pools (web, api, storage, admin), a path-based routing rule with path maps for each URL pattern, and health probes tailored to each backend type. For the /admin/* restriction, use an NSG on the Application Gateway subnet or WAF custom rules. For SSL termination, upload a PFX certificate to the Application Gateway, configure an HTTPS listener on port 443, and optionally add an HTTP-to-HTTPS redirect rule on port 80.</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================== PROVE IT TAB ==================== -->
+        <div id="tab-prove" class="tab-content">
+          <div class="prove-intro">
+            <h2>Prove You Know It</h2>
+            <p>Not memorization — understanding. Can you apply what you learned to real situations?</p>
+            <div class="score-display">Scenarios: <span class="quiz-score">No questions answered yet</span></div>
+          </div>
+
+          <div class="assess-section">
+            <div class="assess-section-title"><span class="assess-icon scenario">?</span> Quick Scenarios</div>
+
+            <div class="quiz-card" data-qid="q1" data-answer="C">
+              <div class="quiz-scenario">
+                <span class="scenario-label">Scenario</span>
+                <p>Your web app needs to route /api/* requests to backend API servers and /static/* to a CDN-origin pool. Which Azure service do you need?</p>
+              </div>
+              <div class="quiz-options">
+                <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>Azure Load Balancer — it can route by URL path</span></div>
+                <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>Azure Traffic Manager — it does DNS-based routing</span></div>
+                <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>Azure Application Gateway — it supports Layer 7 path-based routing</span></div>
+              </div>
+              <div class="quiz-explanation">
+                <div class="explanation-box why-right"><strong>Why this is correct</strong>Application Gateway operates at Layer 7 (HTTP) and supports path-based routing rules. Load Balancer is Layer 4 (TCP/UDP) — it can't inspect URLs. Traffic Manager is DNS-based and routes at the domain level, not the path level.</div>
+                <div class="explanation-box why-wrong"><strong>Common mistakes</strong>Load Balancer (A) works at Layer 4 and has no visibility into HTTP URLs. Traffic Manager (B) resolves DNS to different endpoints — it can't split paths within the same domain.</div>
+              </div>
+            </div>
+
+            <div class="quiz-card" data-qid="q2" data-answer="B">
+              <div class="quiz-scenario">
+                <span class="scenario-label">Scenario</span>
+                <p>Your Load Balancer health probe is configured for TCP on port 80 with a 5-second interval. One backend VM's web server crashed but the VM itself is still running. Will the Load Balancer detect this?</p>
+              </div>
+              <div class="quiz-options">
+                <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>No — TCP probes only check if the VM is running, not the web server</span></div>
+                <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>Yes — TCP probe checks if port 80 is accepting connections; a crashed web server won't accept connections</span></div>
+                <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>No — you need an HTTP probe to check web servers</span></div>
+              </div>
+              <div class="quiz-explanation">
+                <div class="explanation-box why-right"><strong>Why this is correct</strong>A TCP health probe attempts a TCP connection to the specified port. If the web server process crashed, port 80 won't accept connections and the probe will fail, marking the VM as unhealthy. HTTP probes check for a specific status code (like 200) which adds application-level validation, but TCP probes DO detect crashed services.</div>
+                <div class="explanation-box why-wrong"><strong>Common mistakes</strong>TCP probes don't just ping the VM (A is wrong) — they attempt a real TCP handshake on the specified port. While HTTP probes offer deeper validation, TCP probes are sufficient for detecting a crashed service (C is wrong).</div>
+              </div>
+            </div>
+
+            <div class="quiz-card" data-qid="q3" data-answer="A">
+              <div class="quiz-scenario">
+                <span class="scenario-label">Scenario</span>
+                <p>You have a Standard SKU Load Balancer. Backend VMs are healthy but users report they can't access the site. The frontend public IP is correct. What should you check first?</p>
+              </div>
+              <div class="quiz-options">
+                <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>NSG rules — Standard LB requires explicit NSG rules to allow traffic</span></div>
+                <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>The VM operating system firewall</span></div>
+                <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>Whether the VMs have public IPs</span></div>
+              </div>
+              <div class="quiz-explanation">
+                <div class="explanation-box why-right"><strong>Why this is correct</strong>Standard SKU Load Balancers require an NSG rule to allow traffic. Unlike Basic SKU, Standard LB blocks all traffic by default until an NSG explicitly allows it. This is the most common gotcha when migrating from Basic to Standard.</div>
+                <div class="explanation-box why-wrong"><strong>Common mistakes</strong>While OS firewalls (B) can block traffic, the NSG is the first thing to check with Standard SKU. VMs behind a load balancer don't need public IPs (C) — the LB frontend IP handles inbound traffic.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="assess-section">
+            <div class="assess-section-title"><span class="assess-icon troubleshoot">!</span> Troubleshooting Spot</div>
+
+            <div class="trouble-card">
+              <span class="trouble-label">Troubleshoot</span>
+              <p class="trouble-situation">Your Application Gateway is deployed and shows 2 healthy backends. But browsing to the frontend IP gives a 502 Bad Gateway error.</p>
+              <p class="trouble-question">What's wrong?</p>
+              <div class="progressive-hints">
+                <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Hint 1</div><div class="prog-hint-content">502 means the gateway received an invalid response from the backend. Check if the backend VMs are actually serving HTTP on the port specified in the backend settings.</div></div>
+                <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Hint 2</div><div class="prog-hint-content">Check the backend settings — is the port configured to match what the web server is listening on? Also check if the health probe path returns a 200 status.</div></div>
+                <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Answer</div><div class="prog-hint-content answer">The most common cause is a port mismatch — the backend HTTP settings specify a port (e.g., 80) but the web server is listening on a different port (e.g., 8080). Also verify the health probe path (e.g., "/") returns HTTP 200. If the probe path returns 404 or 500, the gateway marks backends as unhealthy even if the main app works.</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="assess-section">
+            <div class="assess-section-title"><span class="assess-icon architect">&#9670;</span> Architect's Corner</div>
+
+            <div class="architect-card" data-aid="a1" data-best="C">
+              <span class="architect-label">Design Decision</span>
+              <p class="architect-situation">Your company's website gets traffic from users worldwide. You need: SSL termination, path-based routing for /api vs /web, WAF protection, and automatic failover between East US and West US regions. Which combination do you use?</p>
+              <div class="architect-options">
+                <div class="arch-option" data-value="A"><div class="arch-option-title">Two Application Gateways (one per region) behind Azure Traffic Manager</div><div class="arch-option-desc">DNS failover, regional App Gateways handle routing/WAF</div></div>
+                <div class="arch-option" data-value="B"><div class="arch-option-title">Two Azure Load Balancers (one per region) behind Azure Front Door</div><div class="arch-option-desc">Global L7 + regional L4</div></div>
+                <div class="arch-option" data-value="C"><div class="arch-option-title">Azure Front Door with WAF, pointing to backend pools in both regions</div><div class="arch-option-desc">Global L7 with built-in WAF, path routing, and health-based failover</div></div>
+              </div>
+              <div class="architect-reveal"><strong>Why this is the best choice</strong>Azure Front Door is purpose-built for this scenario — global Layer 7 load balancing with built-in WAF, SSL termination, path-based routing, and automatic health-based failover between regions. Option A works but adds DNS-level latency for failover (TTL-dependent). Option B uses L4 Load Balancers regionally which can't do path-based routing. Front Door handles everything in one service.</div>
+            </div>
+          </div>
+
+          <button class="reset-quiz-btn">&#8635; Reset All Answers</button>
+        </div>
+
+      </div><!-- /tab-container -->
+
+      <nav class="module-nav">
+        <a href="05-connectivity.html" class="prev">
+          <span class="nav-direction">&larr; Previous Module</span>
+          <span class="nav-title">05: Intersite Connectivity</span>
+        </a>
+        <a href="07-storage.html" class="next">
+          <span class="nav-direction">Next Module &rarr;</span>
+          <span class="nav-title">07: Azure Storage</span>
+        </a>
+      </nav>
+
+    </div><!-- /module-content -->
+
+  </div><!-- /module-page -->
+
+  <footer class="site-footer">
+    <p>Built for the AZ-104 Azure Administrator certification. Lab content sourced from <a href="https://microsoftlearning.github.io/AZ-104-MicrosoftAzureAdministrator/" target="_blank">Microsoft Learning</a>.</p>
+  </footer>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

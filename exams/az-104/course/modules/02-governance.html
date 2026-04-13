@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 02 - Governance &amp; Compliance | AZ-104 Course</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%230078d4'/><text x='50' y='68' font-size='50' text-anchor='middle' fill='white' font-weight='bold'>Az</text></svg>">
+</head>
+<body data-module="m02">
+<div style="background:#0a0e1a;border-bottom:1px solid #1e293b;padding:10px 24px;font-size:0.85rem;font-family:system-ui,-apple-system,sans-serif;"><a href="../../index.html#course" style="color:#64748b;text-decoration:none;">&larr; Back to Pass Wizard AZ-104 hub</a></div>
+
+
+  <nav class="navbar">
+    <a href="../index.html" class="nav-brand">
+      <div class="logo">Az</div>
+      <span>AZ-104 Course</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html">Modules</a></li>
+      <li><a href="https://microsoftlearning.github.io/AZ-104-MicrosoftAzureAdministrator/" target="_blank">Official Labs</a></li>
+    </ul>
+  </nav>
+
+  <div class="module-page">
+
+    <section class="module-hero">
+      <div class="module-hero-content">
+        <div class="breadcrumb">
+          <a href="../index.html">AZ-104</a>
+          <span>/</span>
+          <span>Module 02</span>
+        </div>
+        <div class="module-number">02</div>
+        <h1>Administer Governance &amp; Compliance</h1>
+        <p class="module-subtitle">Manage subscriptions, RBAC, Azure Policy, resource tagging, and resource locks for organizational governance.</p>
+        <div class="meta-bar">
+          <div class="meta-item">
+            <span class="icon">&#128218;</span>
+            <span>Labs 02a &amp; 02b</span>
+          </div>
+          <div class="meta-item">
+            <span class="icon">&#9202;</span>
+            <span>50 min</span>
+          </div>
+          <div class="meta-item">
+            <span class="icon">&#128221;</span>
+            <span>3 Exercises</span>
+          </div>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar" style="width: 0%"></div>
+        </div>
+        <span class="progress-label" style="font-size:0.8rem; color:var(--text-muted); margin-top:6px; display:inline-block;">0/8 completed</span>
+      </div>
+    </section>
+
+    <div class="module-content">
+      <div class="tab-container">
+        <div class="tab-nav">
+          <button class="tab-btn active" data-tab="tab-lesson">Lesson</button>
+          <button class="tab-btn" data-tab="tab-lab">Lab</button>
+          <button class="tab-btn" data-tab="tab-demo">Demo</button>
+          <button class="tab-btn" data-tab="tab-exercises">Exercises</button>
+          <button class="tab-btn" data-tab="tab-prove">Prove It</button>
+        </div>
+
+        <!-- ==================== LESSON TAB ==================== -->
+        <div id="tab-lesson" class="tab-content active">
+
+          <div class="lesson-intro">
+            <h2>What You'll Learn</h2>
+            <p>Governance is about keeping your Azure environment under control — who can do what, where resources can live, and how you organize everything. This module covers management groups, RBAC, Azure Policy, tags, and resource locks.</p>
+            <ul class="lesson-objectives">
+              <li>Understand the Azure resource hierarchy (management groups → subscriptions → resource groups → resources)</li>
+              <li>Assign and create RBAC roles for least-privilege access</li>
+              <li>Use Azure Policy to enforce organizational standards</li>
+              <li>Apply tags and resource locks for governance</li>
+            </ul>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#127970;</span>
+              <h3>The Azure Resource Hierarchy</h3>
+            </div>
+            <div class="concept-body">
+              <p>Azure organizes resources in a hierarchy. Understanding this is critical because <strong>permissions and policies flow downward</strong>:</p>
+              <div class="diagram-box">
+<pre>Management Groups
+  └── Subscriptions
+        └── Resource Groups
+              └── Resources (VMs, Storage, etc.)</pre>
+              </div>
+              <ul>
+                <li><strong>Management Groups</strong> — Containers for subscriptions. Let you apply policy and RBAC across multiple subscriptions at once.</li>
+                <li><strong>Subscriptions</strong> — Billing boundaries. Each subscription gets a separate bill.</li>
+                <li><strong>Resource Groups</strong> — Logical containers for related resources. A resource group is NOT a security boundary by default — it's for organization.</li>
+                <li><strong>Resources</strong> — The actual things (VMs, databases, storage accounts).</li>
+              </ul>
+              <p>Key rule: Permissions assigned at a higher level are <strong>inherited</strong> by everything below. Give someone Reader on a subscription? They can read every resource in every resource group in that subscription.</p>
+            </div>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#128274;</span>
+              <h3>Role-Based Access Control (RBAC)</h3>
+            </div>
+            <div class="concept-body">
+              <p>RBAC answers the question: <strong>"Who can do what, and where?"</strong></p>
+              <p>Three built-in roles cover most needs:</p>
+              <ul>
+                <li><strong>Owner</strong> — Full access + can assign roles to others</li>
+                <li><strong>Contributor</strong> — Full access EXCEPT assigning roles</li>
+                <li><strong>Reader</strong> — View only, can't change anything</li>
+              </ul>
+              <p>Beyond these, there are 100+ specialized roles like <span class="key-term">Virtual Machine Contributor</span> (manage VMs only) and <span class="key-term">Storage Blob Data Reader</span> (read blobs only).</p>
+              <p><strong>Best practice:</strong> Always assign roles to <strong>groups</strong>, not individual users. When someone joins or leaves, you just update group membership — no need to touch role assignments.</p>
+              <div class="info-box important"><strong>Important:</strong> Owner role does NOT bypass Azure Policy. Even an Owner can't create a resource that violates an active policy. This is by design — Policy is pre-deployment enforcement.</div>
+            </div>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#128220;</span>
+              <h3>Azure Policy</h3>
+            </div>
+            <div class="concept-body">
+              <p>Azure Policy enforces rules on your resources. It answers: <strong>"What is allowed in this environment?"</strong></p>
+              <p>How it works:</p>
+              <ol>
+                <li>A <strong>Policy Definition</strong> describes what to check and what to do (written in JSON)</li>
+                <li>You create a <strong>Policy Assignment</strong> that applies the definition to a scope (management group, subscription, or resource group)</li>
+                <li>Azure evaluates every resource operation against active policies</li>
+                <li>Non-compliant operations are denied, flagged, or auto-remediated</li>
+              </ol>
+              <p>Common built-in policies:</p>
+              <ul>
+                <li>"Allowed locations" — Restrict where resources can be deployed</li>
+                <li>"Require a tag and its value" — Force tagging on new resources</li>
+                <li>"Allowed virtual machine SKUs" — Restrict VM sizes</li>
+              </ul>
+              <div class="real-world">Policy is your first line of defense. Before a resource is even created, Policy checks if it's allowed. RBAC controls WHO can act. Policy controls WHAT actions are allowed. Locks prevent accidental destruction AFTER resources exist.</div>
+            </div>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#127991;</span>
+              <h3>Tags and Resource Locks</h3>
+            </div>
+            <div class="concept-body">
+              <p><strong>Tags</strong> are key-value pairs you attach to resources for organization. They're metadata — they don't affect how resources work, but they're essential for cost management, automation, and compliance.</p>
+              <p>Common tags: <span class="key-term">Environment: Production</span>, <span class="key-term">CostCenter: 12345</span>, <span class="key-term">Owner: jane@company.com</span></p>
+              <p><strong>Resource Locks</strong> prevent accidental changes:</p>
+              <ul>
+                <li><strong>Delete lock</strong> — Resources can be modified but not deleted</li>
+                <li><strong>Read-only lock</strong> — Resources can't be modified OR deleted</li>
+              </ul>
+              <p>Locks are inherited. A lock on a resource group applies to all resources inside it. Even Owners can't bypass a lock — you must remove the lock first, then delete.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================== LAB TAB ==================== -->
+        <div id="tab-lab" class="tab-content">
+
+          <h2 style="font-size:1.4rem; font-weight:700; margin-bottom:8px;">Lab 02a - Manage Subscriptions and RBAC</h2>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:32px;">Estimated time: 20 minutes</p>
+
+          <!-- Task 1 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="lab02a-t1">
+              <span class="task-number">1</span>
+              <h3>Implement Management Groups</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <ol class="steps">
+                <li>Sign into the <a href="https://portal.azure.com" target="_blank" style="color:var(--azure-light);">Azure Portal</a>.</li>
+                <li>Search for and select <strong>Management groups</strong>.</li>
+                <li>Click <strong>+ Create</strong> to add a new management group.</li>
+                <li>Configure the management group:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Management group ID</td><td>az104-mg1</td></tr>
+                    <tr><td>Display name</td><td>az104-mg1</td></tr>
+                  </table>
+                </li>
+                <li>Click <strong>Submit</strong> to create the management group.</li>
+              </ol>
+              <div class="info-box note">
+                <strong>Note</strong>
+                Management groups provide a level of scope above subscriptions, allowing you to organize subscriptions hierarchically for unified policy and access management.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 2 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="lab02a-t2">
+              <span class="task-number">2</span>
+              <h3>Review and Assign a Built-in Azure Role</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <ol class="steps">
+                <li>Select the <strong>az104-mg1</strong> management group.</li>
+                <li>Navigate to <strong>Access control (IAM)</strong> and click the <strong>Roles</strong> tab to review built-in roles.</li>
+                <li>Click <strong>+ Add</strong> &gt; <strong>Add role assignment</strong>.</li>
+                <li>Search for and select the <strong>Virtual Machine Contributor</strong> role.</li>
+                <li>On the Members tab, assign access to the <strong>helpdesk</strong> group.</li>
+                <li>Review and assign the role.</li>
+              </ol>
+              <div class="info-box tip">
+                <strong>Best Practice</strong>
+                Always assign roles to groups rather than individual users. This simplifies access management and reduces administrative overhead as team membership changes.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 3 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="lab02a-t3">
+              <span class="task-number">3</span>
+              <h3>Create a Custom RBAC Role</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <ol class="steps">
+                <li>In the <strong>az104-mg1</strong> management group, go to <strong>Access control (IAM)</strong>.</li>
+                <li>Click <strong>+ Add</strong> &gt; <strong>Add custom role</strong>.</li>
+                <li>Set the custom role name to <strong>Custom Support Request</strong>.</li>
+                <li>Under Baseline permissions, select <strong>Clone a role</strong> and choose <strong>Support Request Contributor</strong>.</li>
+                <li>On the Permissions tab, click <strong>Exclude permissions</strong>.</li>
+                <li>Exclude the permission: <strong>Other: Registers Support Resource Provider</strong>.</li>
+                <li>On the Review + create tab, review the JSON definition. Note the <strong>Actions</strong>, <strong>NotActions</strong>, and <strong>AssignableScopes</strong> arrays.</li>
+              </ol>
+              <div class="code-block">
+                <span class="lang-tag">JSON</span>
+{
+  "Name": "Custom Support Request",
+  "Actions": [
+    "Microsoft.Support/*"
+  ],
+  "NotActions": [
+    "Microsoft.Support/register/action"
+  ],
+  "AssignableScopes": [
+    "/providers/Microsoft.Management/managementGroups/az104-mg1"
+  ]
+}</div>
+              <div class="info-box note">
+                <strong>Note</strong>
+                Custom roles allow you to define least-privilege access by combining Actions and NotActions to precisely control what users can and cannot do.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 4 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="lab02a-t4">
+              <span class="task-number">4</span>
+              <h3>Monitor Role Assignments with Activity Log</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <ol class="steps">
+                <li>Navigate back to the <strong>az104-mg1</strong> management group.</li>
+                <li>Open the <strong>Activity log</strong> blade.</li>
+                <li>Review the log entries to verify that role assignment and custom role creation operations were recorded.</li>
+              </ol>
+              <div class="info-box tip">
+                <strong>Tip</strong>
+                The Activity log captures all management-plane operations, making it essential for auditing and troubleshooting governance changes.
+              </div>
+            </div>
+          </div>
+
+          <hr style="border:none; border-top:1px solid var(--border); margin:48px 0;">
+
+          <h2 style="font-size:1.4rem; font-weight:700; margin-bottom:8px;">Lab 02b - Manage Governance via Azure Policy</h2>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:32px;">Estimated time: 30 minutes</p>
+
+          <!-- Task 1 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="lab02b-t1">
+              <span class="task-number">1</span>
+              <h3>Assign Tags via Azure Portal</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <ol class="steps">
+                <li>In the Azure Portal, search for and select <strong>Resource groups</strong>.</li>
+                <li>Click <strong>+ Create</strong> and create a new resource group:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Resource group name</td><td>az104-rg2</td></tr>
+                    <tr><td>Region</td><td>East US</td></tr>
+                  </table>
+                </li>
+                <li>After creation, open the resource group and navigate to <strong>Tags</strong>.</li>
+                <li>Add a tag:
+                  <table class="config-table">
+                    <tr><th>Name</th><th>Value</th></tr>
+                    <tr><td>Cost Center</td><td>000</td></tr>
+                  </table>
+                </li>
+                <li>Click <strong>Apply</strong> to save the tag.</li>
+              </ol>
+            </div>
+          </div>
+
+          <!-- Task 2 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="lab02b-t2">
+              <span class="task-number">2</span>
+              <h3>Enforce Tagging via Azure Policy</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <ol class="steps">
+                <li>Search for and select <strong>Policy</strong>.</li>
+                <li>Under Authoring, click <strong>Definitions</strong>.</li>
+                <li>Search for the built-in policy: <strong>Require a tag and its value on resources</strong>.</li>
+                <li>Click <strong>Assign</strong> and configure the assignment:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Scope</td><td>az104-rg2</td></tr>
+                    <tr><td>Tag Name</td><td>Cost Center</td></tr>
+                    <tr><td>Tag Value</td><td>000</td></tr>
+                  </table>
+                </li>
+                <li>Click <strong>Review + create</strong>, then <strong>Create</strong>.</li>
+                <li>To verify, try creating a storage account in <strong>az104-rg2</strong> without the required tag. The deployment should <strong>fail</strong> with a policy violation.</li>
+              </ol>
+              <div class="info-box warning">
+                <strong>Warning</strong>
+                Policy enforcement can take up to 30 minutes to become active after assignment. If the test deployment doesn't fail immediately, wait and retry.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 3 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="lab02b-t3">
+              <span class="task-number">3</span>
+              <h3>Apply Tagging via Azure Policy</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <ol class="steps">
+                <li>Navigate to <strong>Policy</strong> &gt; <strong>Assignments</strong>.</li>
+                <li>Delete the previous "Require a tag" policy assignment.</li>
+                <li>Go back to <strong>Definitions</strong> and search for <strong>Inherit a tag from the resource group if missing</strong>.</li>
+                <li>Assign this policy to the <strong>az104-rg2</strong> scope with Tag Name: <strong>Cost Center</strong>.</li>
+                <li>On the Remediation tab, check <strong>Create a remediation task</strong> and select the policy to remediate.</li>
+                <li>Click <strong>Review + create</strong>, then <strong>Create</strong>.</li>
+                <li>Create a new storage account in <strong>az104-rg2</strong> (without manually adding tags).</li>
+                <li>After deployment, verify that the <strong>Cost Center: 000</strong> tag was automatically applied to the storage account.</li>
+              </ol>
+              <div class="info-box note">
+                <strong>Note</strong>
+                The "Inherit" policy uses a <strong>modify</strong> effect, which automatically adds or updates tags on resources at deployment time. The remediation task handles existing resources that were created before the policy was assigned.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 4 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="lab02b-t4">
+              <span class="task-number">4</span>
+              <h3>Configure and Test Resource Locks</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <ol class="steps">
+                <li>Navigate to the <strong>az104-rg2</strong> resource group.</li>
+                <li>In the Settings section, click <strong>Locks</strong>.</li>
+                <li>Click <strong>+ Add</strong> and configure:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Lock name</td><td>rg-lock</td></tr>
+                    <tr><td>Lock type</td><td>Delete</td></tr>
+                  </table>
+                </li>
+                <li>Click <strong>OK</strong> to apply the lock.</li>
+                <li>Attempt to delete the resource group. The operation should be <strong>denied</strong> with a lock conflict error.</li>
+              </ol>
+              <div class="info-box important">
+                <strong>Important</strong>
+                Resource locks apply to all users regardless of their RBAC permissions. Even an Owner must first remove the lock before deleting a locked resource.
+              </div>
+            </div>
+          </div>
+
+          <!-- Key Takeaways -->
+          <div class="takeaways">
+            <h3>Key Takeaways</h3>
+            <ul>
+              <li>Management groups organize subscriptions hierarchically for unified governance.</li>
+              <li>Built-in roles provide pre-configured permissions for common scenarios.</li>
+              <li>Custom roles enable least-privilege access tailored to your organization.</li>
+              <li>Azure tags enable logical resource labeling for cost tracking and organization.</li>
+              <li>Azure Policy enforces rules at deployment time (pre-deployment security).</li>
+              <li>RBAC controls who can perform actions (post-deployment security).</li>
+              <li>Resource locks protect critical resources against accidental deletion or modification.</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <!-- ==================== DEMO TAB ==================== -->
+        <div id="tab-demo" class="tab-content">
+
+          <h2 style="font-size:1.3rem; font-weight:700; margin-bottom:24px;">Demonstration Topics</h2>
+
+          <div class="task-block">
+            <div class="task-header">
+              <span class="task-number">1</span>
+              <h3>Configuring Subscriptions</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Walk through the subscription management experience in the Azure Portal. Review subscription properties, cost analysis, and how subscriptions relate to management groups and tenants.</p>
+            </div>
+          </div>
+
+          <div class="task-block">
+            <div class="task-header">
+              <span class="task-number">2</span>
+              <h3>Assigning Azure Policy - Allowed Locations</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Demonstrate assigning the built-in <strong>"Allowed locations"</strong> policy to restrict resource deployment to specific Azure regions.</p>
+              <ol class="steps">
+                <li>Navigate to <strong>Policy</strong> &gt; <strong>Definitions</strong>.</li>
+                <li>Search for <strong>Allowed locations</strong> and select the built-in policy.</li>
+                <li>Click <strong>Assign</strong> and select the target scope (subscription or resource group).</li>
+                <li>Under Parameters, select the allowed locations (e.g., East US, West US).</li>
+                <li>Review + create the assignment.</li>
+                <li>Demonstrate a deployment failure when targeting a disallowed region.</li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="task-block">
+            <div class="task-header">
+              <span class="task-number">3</span>
+              <h3>Creating Initiative Definitions</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Show how to group multiple policy definitions into an <strong>initiative</strong> (policy set) for streamlined assignment and compliance tracking.</p>
+              <ol class="steps">
+                <li>Navigate to <strong>Policy</strong> &gt; <strong>Definitions</strong>.</li>
+                <li>Click <strong>+ Initiative definition</strong>.</li>
+                <li>Add multiple related policies (e.g., tagging policies, location restrictions).</li>
+                <li>Review how initiatives simplify management at scale.</li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="task-block">
+            <div class="task-header">
+              <span class="task-number">4</span>
+              <h3>RBAC Role Assignments and Check Access</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Demonstrate how to assign roles and use the <strong>Check access</strong> feature to verify effective permissions for a user or group.</p>
+              <ol class="steps">
+                <li>Open any resource group and navigate to <strong>Access control (IAM)</strong>.</li>
+                <li>Click <strong>Check access</strong> and search for a user or service principal.</li>
+                <li>Review the effective role assignments showing inherited and direct assignments.</li>
+                <li>Show the difference between assignments at different scopes (management group, subscription, resource group, resource).</li>
+              </ol>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================== EXERCISES TAB ==================== -->
+        <div id="tab-exercises" class="tab-content">
+
+          <h2 style="font-size:1.3rem; font-weight:700; margin-bottom:24px;">Practice Exercises</h2>
+
+          <div class="exercise-card">
+            <span class="difficulty easy">Easy</span>
+            <h4>Exercise 1: Policy Compliance Check</h4>
+            <ol>
+              <li>Navigate to Azure Policy and view the <strong>Compliance</strong> dashboard.</li>
+              <li>Identify any non-compliant resources.</li>
+              <li>Review which policies are currently assigned to your subscription.</li>
+              <li>Check if any built-in initiatives are available for your workload.</li>
+            </ol>
+            <div class="hint">
+              <strong>Show Hint</strong>
+              <div class="hint-text">The Compliance blade shows a percentage for each policy assignment. Click into a policy to see the individual resource compliance details and remediation options.</div>
+            </div>
+          </div>
+
+          <div class="exercise-card">
+            <span class="difficulty medium">Medium</span>
+            <h4>Exercise 2: RBAC Role Investigation</h4>
+            <ol>
+              <li>Pick any resource group and open <strong>Access control (IAM)</strong>.</li>
+              <li>Use <strong>Check access</strong> to verify your own permissions.</li>
+              <li>View all role assignments at the resource group scope.</li>
+              <li>Compare the permissions of <strong>Contributor</strong> vs <strong>Reader</strong> roles.</li>
+              <li>Identify what permissions a <strong>Virtual Machine Contributor</strong> has that <strong>Reader</strong> doesn't.</li>
+            </ol>
+            <div class="hint">
+              <strong>Show Hint</strong>
+              <div class="hint-text">Click into any role to see its full JSON definition with Actions and NotActions. Contributor has <code style="color:var(--accent-cyan);">*</code> (all actions) with specific NotActions, while Reader only has <code style="color:var(--accent-cyan);">*/read</code> actions.</div>
+            </div>
+          </div>
+
+          <div class="exercise-card">
+            <span class="difficulty hard">Hard</span>
+            <h4>Exercise 3: Governance Strategy Design</h4>
+            <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:12px;">Design a governance strategy for a company with Dev, Staging, and Production subscriptions.</p>
+            <ol>
+              <li>Create a management group hierarchy: <strong>Root &gt; Production</strong>, <strong>Root &gt; Non-Production</strong>.</li>
+              <li>Assign <strong>"Allowed locations"</strong> policy at the Root level for East US and West US only.</li>
+              <li>Create a custom role that allows VM management but prevents deletion.</li>
+              <li>Apply resource locks (<strong>Delete</strong>) to the Production resource groups.</li>
+              <li>Implement a tagging policy requiring <strong>"Environment"</strong> and <strong>"CostCenter"</strong> tags.</li>
+              <li>Document your strategy and explain why each control exists.</li>
+            </ol>
+            <div class="hint">
+              <strong>Show Hint</strong>
+              <div class="hint-text">Policies assigned at the management group level are inherited by all child subscriptions. Place shared restrictions (like allowed locations) at the Root management group, and environment-specific policies at the Production or Non-Production level. Use NotActions in your custom role to explicitly deny <code style="color:var(--accent-cyan);">Microsoft.Compute/virtualMachines/delete</code>.</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================== PROVE IT TAB ==================== -->
+        <div id="tab-prove" class="tab-content">
+          <div class="prove-intro">
+            <h2>Prove You Know It</h2>
+            <p>Not memorization — understanding. Can you apply what you learned to real situations?</p>
+            <div class="score-display">Scenarios: <span class="quiz-score">No questions answered yet</span></div>
+          </div>
+
+          <div class="assess-section">
+            <div class="assess-section-title"><span class="assess-icon scenario">?</span> Quick Scenarios</div>
+
+            <div class="quiz-card" data-qid="q1" data-answer="B">
+              <div class="quiz-scenario">
+                <span class="scenario-label">Scenario</span>
+                <p>A developer creates a VM in West Europe, but your company policy requires all resources in East US and West US only. The VM deployed successfully. What went wrong?</p>
+              </div>
+              <div class="quiz-options">
+                <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>Azure Policy can't restrict locations</span></div>
+                <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>The "Allowed locations" policy wasn't assigned or was assigned at the wrong scope</span></div>
+                <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>The developer has Owner role which bypasses policy</span></div>
+              </div>
+              <div class="quiz-explanation">
+                <div class="explanation-box why-right"><strong>Why this is correct</strong>Azure Policy applies to everyone regardless of role — even Owners. If the VM was created, the policy either wasn't assigned, wasn't assigned at the right scope (subscription/resource group), or enforcement was set to "Disabled".</div>
+                <div class="explanation-box why-wrong"><strong>Common mistakes</strong>Azure Policy absolutely can restrict locations (A) — that's one of its most common uses. Owner role (C) does NOT bypass policy. RBAC and Policy are independent systems.</div>
+              </div>
+            </div>
+
+            <div class="quiz-card" data-qid="q2" data-answer="C">
+              <div class="quiz-scenario">
+                <span class="scenario-label">Scenario</span>
+                <p>You need to let the help desk team create support tickets and manage VMs, but nothing else. What's the best approach?</p>
+              </div>
+              <div class="quiz-options">
+                <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>Give them the Contributor role at the subscription level</span></div>
+                <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>Give them the Owner role on a specific resource group</span></div>
+                <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>Create a custom role combining VM Contributor and Support Request Contributor permissions</span></div>
+              </div>
+              <div class="quiz-explanation">
+                <div class="explanation-box why-right"><strong>Why this is correct</strong>Custom roles let you follow least-privilege. A custom role combining just the needed permissions gives them exactly what they need and nothing more.</div>
+                <div class="explanation-box why-wrong"><strong>Common mistakes</strong>Contributor (A) grants too much access — can manage everything except access. Owner (B) adds the ability to grant access to others. Both violate least-privilege.</div>
+              </div>
+            </div>
+
+            <div class="quiz-card" data-qid="q3" data-answer="A">
+              <div class="quiz-scenario">
+                <span class="scenario-label">Scenario</span>
+                <p>You applied a "Delete" resource lock to a resource group. A team member tries to delete a storage account inside it and gets denied. But they CAN still modify files in that storage account. Is this correct behavior?</p>
+              </div>
+              <div class="quiz-options">
+                <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>Yes — Delete locks prevent deletion but allow modifications</span></div>
+                <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>No — Delete locks should prevent all changes</span></div>
+                <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>No — The lock shouldn't affect resources inside the group</span></div>
+              </div>
+              <div class="quiz-explanation">
+                <div class="explanation-box why-right"><strong>Why this is correct</strong>Delete locks only prevent deletion, not modification. If you need to prevent ALL changes, use a Read-only lock instead.</div>
+                <div class="explanation-box why-wrong"><strong>Common mistakes</strong>Confusing Delete locks with Read-only locks (B). Locks ARE inherited by child resources (C) — a lock on a resource group applies to all resources within it.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="assess-section">
+            <div class="assess-section-title"><span class="assess-icon troubleshoot">!</span> Troubleshooting Spot</div>
+
+            <div class="trouble-card">
+              <span class="trouble-label">Troubleshoot</span>
+              <p class="trouble-situation">You assigned the "Require a tag" policy to a resource group, but users can still create resources without tags. The policy shows as "Assigned" in the portal.</p>
+              <p class="trouble-question">What's going wrong?</p>
+              <div class="progressive-hints">
+                <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Hint 1</div><div class="prog-hint-content">Check the policy assignment's "Enforcement" setting — it might be set to "Disabled".</div></div>
+                <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Hint 2</div><div class="prog-hint-content">New policy assignments can take up to 30 minutes to take effect. Wait and retry.</div></div>
+                <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Answer</div><div class="prog-hint-content answer">Most likely the enforcement is disabled (common when testing). Edit the assignment and set enforcement to "Enabled". Also note: policies only apply to NEW operations — existing non-compliant resources stay as-is until a remediation task is created.</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="assess-section">
+            <div class="assess-section-title"><span class="assess-icon architect">&#9670;</span> Architect's Corner</div>
+
+            <div class="architect-card" data-aid="a1" data-best="C">
+              <span class="architect-label">Design Decision</span>
+              <p class="architect-situation">You're setting up governance for a company with dev, staging, and production environments across 3 subscriptions. Where should you assign your "Allowed locations" policy?</p>
+              <div class="architect-options">
+                <div class="arch-option" data-value="A"><div class="arch-option-title">Option A</div><div class="arch-option-desc">On each subscription individually. Direct assignment, 3 policies to manage.</div></div>
+                <div class="arch-option" data-value="B"><div class="arch-option-title">Option B</div><div class="arch-option-desc">On each resource group where resources are deployed. Granular control, many policies to manage.</div></div>
+                <div class="arch-option" data-value="C"><div class="arch-option-title">Option C</div><div class="arch-option-desc">On a management group containing all 3 subscriptions. Single policy inherited by all subscriptions.</div></div>
+              </div>
+              <div class="architect-reveal"><strong>Why this is the best choice</strong>Management group assignment gives you one policy to maintain that covers all current and future subscriptions. Individual subscription assignments (A) work but multiply your management overhead. Resource group level (B) is even more granular but becomes unmanageable quickly. The whole point of management groups is exactly this — centralized governance that inherits downward.</div>
+            </div>
+          </div>
+
+          <button class="reset-quiz-btn">&#8635; Reset All Answers</button>
+        </div>
+
+      </div>
+
+      <nav class="module-nav">
+        <a href="01-identity.html" class="prev">
+          <span class="nav-direction">&larr; Previous Module</span>
+          <span class="nav-title">01: Administer Identity</span>
+        </a>
+        <a href="03-resources.html" class="next">
+          <span class="nav-direction">Next Module &rarr;</span>
+          <span class="nav-title">03: Azure Resources</span>
+        </a>
+      </nav>
+
+    </div>
+
+  </div>
+
+  <footer class="site-footer">
+    <p>Built for the AZ-104 Azure Administrator certification. Lab content sourced from <a href="https://microsoftlearning.github.io/AZ-104-MicrosoftAzureAdministrator/" target="_blank">Microsoft Learning</a>.</p>
+  </footer>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

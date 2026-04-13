@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 09: Administer PaaS Compute Options | AZ-104</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%230078d4'/><text x='50' y='68' font-size='50' text-anchor='middle' fill='white' font-weight='bold'>Az</text></svg>">
+</head>
+<body data-module="m09">
+<div style="background:#0a0e1a;border-bottom:1px solid #1e293b;padding:10px 24px;font-size:0.85rem;font-family:system-ui,-apple-system,sans-serif;"><a href="../../index.html#course" style="color:#64748b;text-decoration:none;">&larr; Back to Pass Wizard AZ-104 hub</a></div>
+
+
+  <nav class="navbar">
+    <a href="../index.html" class="nav-brand">
+      <div class="logo">Az</div>
+      <span>AZ-104 Course</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html#modules">Modules</a></li>
+      <li><a href="https://microsoftlearning.github.io/AZ-104-MicrosoftAzureAdministrator/" target="_blank">Official Labs</a></li>
+    </ul>
+  </nav>
+
+  <div class="module-page">
+
+    <section class="module-hero">
+      <div class="module-hero-content">
+        <div class="breadcrumb">
+          <a href="../index.html">AZ-104</a>
+          <span>/</span>
+          <span>Module 09</span>
+        </div>
+        <h1>Administer PaaS Compute Options</h1>
+        <p class="module-subtitle">Deploy web apps with deployment slots, run serverless containers with ACI, and manage microservices with Azure Container Apps.</p>
+        <div class="meta-bar">
+          <div class="meta-item">
+            <span class="icon">&#9776;</span>
+            <span>Labs 09a&ndash;09c</span>
+          </div>
+          <div class="meta-item">
+            <span class="icon">&#9654;</span>
+            <span>Demo</span>
+          </div>
+          <div class="meta-item">
+            <span class="icon">&#9998;</span>
+            <span>3 Exercises</span>
+          </div>
+          <div class="meta-item">
+            <span class="icon">&#9200;</span>
+            <span>50 min</span>
+          </div>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar" style="width: 0%"></div>
+        </div>
+        <span class="progress-label" style="font-size:0.8rem; color:var(--text-muted); margin-top:6px; display:inline-block;">0/9 completed</span>
+      </div>
+    </section>
+
+    <div class="module-content">
+      <div class="tab-container">
+        <div class="tab-nav">
+          <button class="tab-btn active" data-tab="tab-lesson">Lesson</button>
+          <button class="tab-btn" data-tab="tab-lab">Lab</button>
+          <button class="tab-btn" data-tab="tab-demo">Demo</button>
+          <button class="tab-btn" data-tab="tab-exercises">Exercises</button>
+          <button class="tab-btn" data-tab="tab-prove">Prove It</button>
+        </div>
+
+        <!-- ==================== LESSON TAB ==================== -->
+        <div id="tab-lesson" class="tab-content active">
+
+          <div class="lesson-intro">
+            <h2>What You'll Learn</h2>
+            <p>Platform as a Service (PaaS) lets you deploy applications without managing the underlying infrastructure. This module covers three Azure PaaS compute options: App Service, Container Instances, and Container Apps &mdash; when to use each and how they differ.</p>
+            <ul class="lesson-objectives">
+              <li>Understand PaaS vs IaaS and when to choose each</li>
+              <li>Deploy web apps with Azure App Service and deployment slots</li>
+              <li>Run containerized workloads with Azure Container Instances (ACI)</li>
+              <li>Deploy microservices with Azure Container Apps</li>
+            </ul>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#9729;</span>
+              <h3>PaaS vs IaaS</h3>
+            </div>
+            <div class="concept-body">
+              <table class="compare-table">
+                <thead>
+                  <tr><th>Aspect</th><th>IaaS (VMs)</th><th>PaaS (App Service, ACI, Container Apps)</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>You manage</td><td>OS, runtime, patches, scaling</td><td>Your code/container only</td></tr>
+                  <tr><td>Azure manages</td><td>Hardware, network, virtualization</td><td>Everything else</td></tr>
+                  <tr><td>Control</td><td>Full</td><td>Limited</td></tr>
+                  <tr><td>Cost model</td><td>Pay for VM uptime</td><td>Pay for consumption or plan</td></tr>
+                  <tr><td>Best for</td><td>Custom OS, legacy apps, full control</td><td>Web apps, APIs, microservices</td></tr>
+                </tbody>
+              </table>
+              <p>PaaS removes operational burden. You don't patch servers, configure load balancers, or manage OS updates. The trade-off: less control over the underlying infrastructure.</p>
+            </div>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#127760;</span>
+              <h3>Azure App Service</h3>
+            </div>
+            <div class="concept-body">
+              <p>App Service is Azure's managed platform for web apps, APIs, and mobile backends. It supports .NET, Java, Node.js, Python, PHP, and Ruby.</p>
+              <p><strong>Key concepts:</strong></p>
+              <ul>
+                <li><strong>App Service Plan</strong> &mdash; The compute that powers your app. Defines the VM size, region, and pricing tier. Multiple apps can share one plan.</li>
+                <li><strong>Deployment Slots</strong> &mdash; Separate environments (staging, production) for your app. You deploy to staging, test it, then <strong>swap</strong> to production with zero downtime. If something breaks, swap back instantly.</li>
+                <li><strong>Autoscale</strong> &mdash; Automatically add or remove instances based on rules or schedules.</li>
+              </ul>
+              <p><strong>Pricing tiers that matter:</strong></p>
+              <ul>
+                <li><strong>Free (F1)</strong> &mdash; Testing only. No SLA, no custom domain, no slots.</li>
+                <li><strong>Basic (B1)</strong> &mdash; Manual scaling. No slots.</li>
+                <li><strong>Standard (S1)</strong> &mdash; Autoscale, 5 deployment slots, custom domains + SSL.</li>
+                <li><strong>Premium (P1V3)</strong> &mdash; Enhanced performance, 20 slots, VNet integration.</li>
+              </ul>
+              <div class="info-box tip"><strong>Tip:</strong> Deployment slots are one of App Service's best features. Deploy to staging, test, swap. If the swap goes wrong, swap back. The old version is always one swap away.</div>
+            </div>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#128230;</span>
+              <h3>Azure Container Instances (ACI)</h3>
+            </div>
+            <div class="concept-body">
+              <p>ACI is the simplest way to run a container in Azure. No VMs to manage, no orchestration to configure. You give Azure a container image, and it runs it.</p>
+              <p><strong>Best for:</strong></p>
+              <ul>
+                <li>Short-lived tasks (batch jobs, data processing)</li>
+                <li>Simple applications that don't need scaling</li>
+                <li>CI/CD build agents</li>
+                <li>Quick testing and prototyping</li>
+              </ul>
+              <p><strong>NOT best for:</strong> Long-running services that need autoscaling, service discovery, or complex networking &mdash; use Container Apps or AKS instead.</p>
+              <div class="real-world">ACI charges per-second. A container that runs for 10 minutes costs almost nothing. This makes it perfect for scheduled batch jobs &mdash; spin up, process, shut down.</div>
+            </div>
+          </div>
+
+          <div class="concept-block">
+            <div class="concept-header">
+              <span class="concept-icon">&#128736;</span>
+              <h3>Azure Container Apps</h3>
+            </div>
+            <div class="concept-body">
+              <p>Container Apps is Azure's managed container platform built on Kubernetes &mdash; but you never touch Kubernetes directly. It handles scaling, load balancing, and service discovery for you.</p>
+              <p><strong>Key features:</strong></p>
+              <ul>
+                <li><strong>Revision-based deployment</strong> &mdash; Each deployment creates a revision. You can split traffic between revisions (canary deployments).</li>
+                <li><strong>Scale to zero</strong> &mdash; Apps with no traffic scale down to zero instances (you pay nothing).</li>
+                <li><strong>Dapr integration</strong> &mdash; Built-in microservices building blocks (service calls, pub/sub, state management).</li>
+                <li><strong>KEDA-based scaling</strong> &mdash; Scale on HTTP requests, queue messages, cron schedules, and more.</li>
+              </ul>
+              <table class="compare-table">
+                <thead>
+                  <tr><th>Feature</th><th>ACI</th><th>Container Apps</th><th>AKS</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Complexity</td><td>Simplest</td><td>Moderate</td><td>Most complex</td></tr>
+                  <tr><td>Scaling</td><td>None (fixed)</td><td>Autoscale, scale to zero</td><td>Full Kubernetes scaling</td></tr>
+                  <tr><td>Networking</td><td>Basic</td><td>Ingress, service discovery</td><td>Full K8s networking</td></tr>
+                  <tr><td>Best for</td><td>One-off tasks</td><td>Microservices, APIs</td><td>Full control needed</td></tr>
+                  <tr><td>You manage</td><td>Container config</td><td>Container + scaling rules</td><td>Entire cluster</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================== LAB TAB ==================== -->
+        <div id="tab-lab" class="tab-content">
+
+          <!-- ========== Lab 09a ========== -->
+          <h2 style="margin-bottom: 8px;">Lab 09a &mdash; Implement Web Apps</h2>
+          <p style="color: var(--text-muted); margin-bottom: 32px;">Estimated time: 20 minutes</p>
+
+          <!-- Task 1 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t1">
+              <span class="task-number">1</span>
+              <h3>Create and Configure Azure Web App</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Create an App Service Web App with the PHP runtime on a Linux App Service Plan.</p>
+
+              <ol class="steps">
+                <li>Navigate to <strong>App Services</strong> and click <strong>+ Create</strong> &rarr; <strong>Web App</strong>.</li>
+                <li>Configure the Web App:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Resource Group</td><td>az104-rg9 (create new)</td></tr>
+                    <tr><td>Name</td><td>A globally unique name</td></tr>
+                    <tr><td>Runtime stack</td><td>PHP 8.2</td></tr>
+                    <tr><td>Operating system</td><td>Linux</td></tr>
+                    <tr><td>Pricing plan</td><td>Premium V3 P1V3</td></tr>
+                  </table>
+                </li>
+                <li>Click <strong>Review + create</strong>, then <strong>Create</strong>.</li>
+                <li>Once deployed, navigate to the Web App and note the <strong>Default domain</strong> URL.</li>
+              </ol>
+
+              <div class="info-box note">
+                <strong>Note</strong>
+                The Premium V3 tier provides enhanced performance, VNet integration, and deployment slots. Web App names must be globally unique as they form part of the URL.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 2 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t2">
+              <span class="task-number">2</span>
+              <h3>Create Deployment Slot</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Add a staging deployment slot to enable safe pre-production testing.</p>
+
+              <ol class="steps">
+                <li>Navigate to your Web App &rarr; <strong>Deployment slots</strong> blade.</li>
+                <li>Click <strong>+ Add slot</strong>.</li>
+                <li>Enter the name <strong>staging</strong>.</li>
+                <li>For <strong>Clone settings from</strong>, select <strong>Do not clone settings</strong>.</li>
+                <li>Click <strong>Add</strong>.</li>
+                <li>Click on the <strong>staging</strong> slot to open it.</li>
+                <li>Note the <strong>Default domain</strong> URL &mdash; verify it differs from the production slot URL (it will include <code>-staging</code> in the hostname).</li>
+              </ol>
+
+              <div class="info-box tip">
+                <strong>Tip</strong>
+                Deployment slots are live apps with their own hostnames. Cloning settings copies app settings and connection strings from an existing slot, which is useful when you want staging to mirror production configuration.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 3 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t3">
+              <span class="task-number">3</span>
+              <h3>Configure Deployment Settings</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Deploy a sample PHP application to the staging slot using an external Git repository.</p>
+
+              <ol class="steps">
+                <li>In the <strong>staging</strong> slot, navigate to <strong>Deployment Center</strong>.</li>
+                <li>Set <strong>Source</strong> to <strong>External Git</strong>.</li>
+                <li>Configure the repository:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Repository</td><td>https://github.com/Azure-Samples/php-docs-hello-world</td></tr>
+                    <tr><td>Branch</td><td>master</td></tr>
+                  </table>
+                </li>
+                <li>Click <strong>Save</strong>.</li>
+                <li>Wait for the deployment to complete (check the <strong>Logs</strong> tab).</li>
+                <li>Browse to the staging slot URL and verify you see <strong>&ldquo;Hello World!&rdquo;</strong>.</li>
+              </ol>
+
+              <div class="info-box note">
+                <strong>Note</strong>
+                External Git deployment pulls code from a public repository. For private repos, use GitHub Actions, Azure DevOps, or local Git with deployment credentials.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 4 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t4">
+              <span class="task-number">4</span>
+              <h3>Swap Deployment Slots</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Swap the staging and production slots to promote the new code to production.</p>
+
+              <ol class="steps">
+                <li>Navigate back to the main Web App (production slot).</li>
+                <li>Go to the <strong>Deployment slots</strong> blade.</li>
+                <li>Click <strong>Swap</strong>.</li>
+                <li>Verify the <strong>Source</strong> is <strong>staging</strong> and <strong>Target</strong> is <strong>production</strong>.</li>
+                <li>Click <strong>Start Swap</strong> and wait for completion.</li>
+                <li>Browse to the <strong>production</strong> URL and verify it now shows <strong>&ldquo;Hello World!&rdquo;</strong>.</li>
+              </ol>
+
+              <div class="info-box tip">
+                <strong>Tip</strong>
+                Slot swaps are instant with no downtime. If the new version has issues, simply swap again to roll back. The swap operation exchanges the content and configuration between slots.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 5 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t5">
+              <span class="task-number">5</span>
+              <h3>Configure and Test Autoscaling</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Enable automatic scaling and use Azure Load Testing to observe scaling behavior.</p>
+
+              <ol class="steps">
+                <li>Navigate to your Web App &rarr; <strong>Scale out (App Service plan)</strong>.</li>
+                <li>Select <strong>Automatic</strong> scaling.</li>
+                <li>Set <strong>Maximum burst</strong> to <strong>2</strong>.</li>
+                <li>Click <strong>Save</strong>.</li>
+                <li>Navigate to <strong>Azure Load Testing</strong> (search in the portal) and create a new load test resource.</li>
+                <li>Create a quick test targeting your Web App URL.</li>
+                <li>Monitor the following metrics during the test:
+                  <table class="config-table">
+                    <tr><th>Metric</th><th>What to Watch</th></tr>
+                    <tr><td>Virtual users</td><td>Number of simulated concurrent users</td></tr>
+                    <tr><td>Response time</td><td>Average latency per request</td></tr>
+                    <tr><td>Requests/sec</td><td>Throughput under load</td></tr>
+                  </table>
+                </li>
+              </ol>
+
+              <div class="info-box note">
+                <strong>Note</strong>
+                Automatic scaling in App Service differs from custom autoscale rules. It uses platform-managed scaling decisions based on HTTP traffic patterns rather than metric-based rules you define.
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== Lab 09b ========== -->
+          <h2 style="margin-bottom: 8px; margin-top: 48px;">Lab 09b &mdash; Implement Azure Container Instances</h2>
+          <p style="color: var(--text-muted); margin-bottom: 32px;">Estimated time: 15 minutes</p>
+
+          <!-- Task 6 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t6">
+              <span class="task-number">6</span>
+              <h3>Deploy Azure Container Instance</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Create a serverless container instance running a sample application.</p>
+
+              <ol class="steps">
+                <li>Navigate to <strong>Container Instances</strong> and click <strong>+ Create</strong>.</li>
+                <li>Configure the container:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Resource Group</td><td>az104-rg9</td></tr>
+                    <tr><td>Container name</td><td>az104-c1</td></tr>
+                    <tr><td>Region</td><td>East US</td></tr>
+                    <tr><td>Image source</td><td>Other registry</td></tr>
+                    <tr><td>Image</td><td>mcr.microsoft.com/azuredocs/aci-helloworld:latest</td></tr>
+                    <tr><td>OS type</td><td>Linux</td></tr>
+                  </table>
+                </li>
+                <li>On the <strong>Networking</strong> tab, set a <strong>DNS name label</strong> (must be unique in the region).</li>
+                <li>Click <strong>Review + create</strong>, then <strong>Create</strong>.</li>
+              </ol>
+
+              <div class="info-box note">
+                <strong>Note</strong>
+                Azure Container Instances (ACI) provides the fastest and simplest way to run a container in Azure. There is no VM to manage and no orchestrator to learn &mdash; just provide the image and go.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 7 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t7">
+              <span class="task-number">7</span>
+              <h3>Test and Verify Container Instance</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Confirm the container is running and accessible via its FQDN.</p>
+
+              <ol class="steps">
+                <li>Navigate to the <strong>az104-c1</strong> container instance.</li>
+                <li>Confirm the <strong>Status</strong> shows <strong>Running</strong>.</li>
+                <li>Copy the <strong>FQDN</strong> (Fully Qualified Domain Name) from the overview blade.</li>
+                <li>Open the FQDN in a browser and verify you see <strong>&ldquo;Welcome to Azure Container Instances!&rdquo;</strong>.</li>
+                <li>Navigate to the <strong>Containers</strong> blade &rarr; <strong>Logs</strong> tab.</li>
+                <li>Review the container logs to see incoming HTTP request entries.</li>
+              </ol>
+
+              <div class="info-box tip">
+                <strong>Tip</strong>
+                The FQDN format is <code>&lt;dns-label&gt;.&lt;region&gt;.azurecontainer.io</code>. You can also use the <strong>Connect</strong> tab to open an interactive shell session directly into the running container.
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== Lab 09c ========== -->
+          <h2 style="margin-bottom: 8px; margin-top: 48px;">Lab 09c &mdash; Implement Azure Container Apps</h2>
+          <p style="color: var(--text-muted); margin-bottom: 32px;">Estimated time: 15 minutes</p>
+
+          <!-- Task 8 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t8">
+              <span class="task-number">8</span>
+              <h3>Create Container App</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Deploy an Azure Container App using the built-in quickstart image.</p>
+
+              <ol class="steps">
+                <li>Navigate to <strong>Container Apps</strong> and click <strong>+ Create</strong>.</li>
+                <li>Configure the Container App:
+                  <table class="config-table">
+                    <tr><th>Setting</th><th>Value</th></tr>
+                    <tr><td>Resource Group</td><td>az104-rg9</td></tr>
+                    <tr><td>Container app name</td><td>my-app</td></tr>
+                    <tr><td>Region</td><td>East US</td></tr>
+                    <tr><td>Container Apps Environment</td><td>my-environment (create new)</td></tr>
+                  </table>
+                </li>
+                <li>On the <strong>Container</strong> tab, select <strong>Use quickstart image</strong>.</li>
+                <li>Choose the <strong>Simple hello world container</strong> image.</li>
+                <li>Click <strong>Review + create</strong>, then <strong>Create</strong>.</li>
+              </ol>
+
+              <div class="info-box note">
+                <strong>Note</strong>
+                Container Apps Environments are the secure boundary around groups of container apps. Apps in the same environment share the same virtual network and log analytics workspace.
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 9 -->
+          <div class="task-block">
+            <div class="task-header">
+              <input type="checkbox" class="completion-check" data-task="t9">
+              <span class="task-number">9</span>
+              <h3>Test and Verify Container App</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Verify the Container App is running and accessible via its application URL.</p>
+
+              <ol class="steps">
+                <li>Navigate to the <strong>my-app</strong> Container App.</li>
+                <li>Locate the <strong>Application Url</strong> on the overview blade.</li>
+                <li>Click the URL or open it in a new browser tab.</li>
+                <li>Verify you see the message: <strong>&ldquo;Your Azure Container Apps app is live&rdquo;</strong>.</li>
+              </ol>
+
+              <div class="info-box tip">
+                <strong>Tip</strong>
+                Container Apps automatically provisions an HTTPS endpoint with a valid TLS certificate. You can also configure custom domains and scale-to-zero to reduce costs when there is no traffic.
+              </div>
+            </div>
+          </div>
+
+          <!-- Key Takeaways -->
+          <div class="takeaways">
+            <h3>Key Takeaways</h3>
+            <ul>
+              <li>App Services enable rapid web app deployment with built-in CI/CD, scaling, and SSL.</li>
+              <li>Deployment slots allow staging and testing before swapping to production with zero downtime.</li>
+              <li>Azure Container Instances (ACI) provide serverless containers ideal for short-lived or burst workloads.</li>
+              <li>Azure Container Apps provide managed Kubernetes-style orchestration without cluster management overhead.</li>
+              <li>Autoscaling is available at both the App Service and Container Apps level to handle variable traffic.</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <!-- ==================== DEMO TAB ==================== -->
+        <div id="tab-demo" class="tab-content">
+
+          <h2 style="margin-bottom: 32px;">Demonstrations</h2>
+
+          <div class="task-block">
+            <div class="task-header">
+              <span class="task-number">1</span>
+              <h3>App Service Plans: Pricing Tiers and Scaling</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Explore App Service Plan options and demonstrate scaling capabilities:</p>
+              <ol class="steps">
+                <li>Navigate to <strong>App Service plans</strong> and click <strong>+ Create</strong>.</li>
+                <li>Show the difference between <strong>Windows</strong> and <strong>Linux</strong> operating systems.</li>
+                <li>Walk through pricing tiers: Free (F1), Basic (B1), Standard (S1), Premium (P1V3).</li>
+                <li>Highlight key differences: deployment slots (Standard+), autoscale (Standard+), VNet integration (Premium).</li>
+                <li>Demonstrate <strong>Scale up</strong>: changing the pricing tier to get more CPU/RAM.</li>
+                <li>Demonstrate <strong>Scale out</strong>: increasing the instance count (manual or automatic).</li>
+              </ol>
+              <div class="info-box tip">
+                <strong>Tip</strong>
+                Scale up changes the hardware (more powerful machine). Scale out adds more instances behind the load balancer. Use scale out for high availability and scale up for resource-intensive workloads.
+              </div>
+            </div>
+          </div>
+
+          <div class="task-block">
+            <div class="task-header">
+              <span class="task-number">2</span>
+              <h3>Web App Creation and Deployment Slots</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Create a Web App with .NET runtime and demonstrate deployment slot workflows:</p>
+              <ol class="steps">
+                <li>Create a new Web App with <strong>.NET 8</strong> runtime on a <strong>Standard S1</strong> plan.</li>
+                <li>Show the default domain and browse to the placeholder page.</li>
+                <li>Navigate to <strong>Deployment slots</strong> and add a <strong>staging</strong> slot.</li>
+                <li>Demonstrate deploying different code to staging vs production.</li>
+                <li>Show the <strong>Traffic %</strong> setting for canary deployments (e.g., 10% to staging).</li>
+                <li>Perform a <strong>Swap</strong> and show how the URLs exchange content instantly.</li>
+              </ol>
+              <div class="info-box note">
+                <strong>Note</strong>
+                Deployment slots are available at Standard tier and above. Each slot is essentially a separate app instance with its own hostname, settings, and deployed code.
+              </div>
+            </div>
+          </div>
+
+          <div class="task-block">
+            <div class="task-header">
+              <span class="task-number">3</span>
+              <h3>Container Instances: Quickstart and Verification</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Demonstrate the simplicity of deploying containers with ACI:</p>
+              <ol class="steps">
+                <li>Navigate to <strong>Container Instances</strong> and click <strong>+ Create</strong>.</li>
+                <li>Use a quickstart image such as <code>mcr.microsoft.com/azuredocs/aci-helloworld:latest</code>.</li>
+                <li>Set a <strong>DNS name label</strong> and show the resulting FQDN format.</li>
+                <li>Deploy and browse to the FQDN to verify the container is running.</li>
+                <li>Show the <strong>Containers</strong> blade: logs, events, and the Connect (shell) option.</li>
+                <li>Discuss pricing: billed per second of CPU and memory consumed.</li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="task-block">
+            <div class="task-header">
+              <span class="task-number">4</span>
+              <h3>Container Apps: Environments and Application URLs</h3>
+              <span class="task-toggle">&#9660;</span>
+            </div>
+            <div class="task-body">
+              <p>Demonstrate Container Apps as a managed platform for microservices:</p>
+              <ol class="steps">
+                <li>Navigate to <strong>Container Apps</strong> and click <strong>+ Create</strong>.</li>
+                <li>Create a new <strong>Container Apps Environment</strong> and explain its role as a shared boundary.</li>
+                <li>Deploy a quickstart container app and show the auto-generated <strong>Application URL</strong>.</li>
+                <li>Browse to the URL and verify the app is running with HTTPS.</li>
+                <li>Show the <strong>Scale and replicas</strong> blade &mdash; demonstrate min/max replica settings and scale-to-zero capability.</li>
+                <li>Compare Container Apps to ACI: long-running services, built-in ingress, revision management, and Dapr integration.</li>
+              </ol>
+              <div class="info-box tip">
+                <strong>Tip</strong>
+                Container Apps supports scale-to-zero, meaning you pay nothing when there are no active requests. This makes it cost-effective for intermittent workloads compared to always-on App Service plans.
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================== EXERCISES TAB ==================== -->
+        <div id="tab-exercises" class="tab-content">
+
+          <h2 style="margin-bottom: 32px;">Exercises</h2>
+
+          <!-- Exercise 1 -->
+          <div class="exercise-card">
+            <span class="difficulty easy">Easy</span>
+            <h4>Exercise 1: App Service Plan Comparison</h4>
+            <ol>
+              <li>Navigate to <strong>App Service plans</strong> and explore the available pricing tiers.</li>
+              <li>Compare <strong>Free (F1)</strong>, <strong>Basic (B1)</strong>, <strong>Standard (S1)</strong>, and <strong>Premium (P1V3)</strong>.</li>
+              <li>For each tier, document: included features, scaling options, SLA guarantee, and price per hour.</li>
+              <li>At what tier do deployment slots become available?</li>
+            </ol>
+            <div class="hint">
+              <strong>Show Hint</strong>
+              <div class="hint-text">Deployment slots require <strong>Standard</strong> tier or higher. Free and Basic tiers do not support deployment slots. Standard provides up to 5 slots, Premium provides up to 20 slots.</div>
+            </div>
+          </div>
+
+          <!-- Exercise 2 -->
+          <div class="exercise-card">
+            <span class="difficulty medium">Medium</span>
+            <h4>Exercise 2: Container Deployment Comparison</h4>
+            <ol>
+              <li>Deploy the same hello-world container image as both an <strong>ACI instance</strong> and a <strong>Container App</strong>.</li>
+              <li>Compare: deployment time, configuration options, and networking setup.</li>
+              <li>Access both via their URLs and verify they work correctly.</li>
+              <li>Document: When would you use ACI vs Container Apps vs AKS?</li>
+            </ol>
+            <div class="hint">
+              <strong>Show Hint</strong>
+              <div class="hint-text"><strong>ACI</strong> = simple, short-lived tasks and burst workloads. <strong>Container Apps</strong> = microservices and long-running apps without managing Kubernetes. <strong>AKS</strong> = full Kubernetes control for complex, multi-service workloads requiring custom orchestration.</div>
+            </div>
+          </div>
+
+          <!-- Exercise 3 -->
+          <div class="exercise-card">
+            <span class="difficulty hard">Hard</span>
+            <h4>Exercise 3: Blue-Green Deployment</h4>
+            <p>Implement a blue-green deployment strategy using App Service deployment slots.</p>
+            <ol>
+              <li>Create a Web App with a <strong>production</strong> slot running version 1 of your app.</li>
+              <li>Create a <strong>staging</strong> slot and deploy version 2 of your app.</li>
+              <li>Test version 2 by browsing to the staging URL.</li>
+              <li>Configure <strong>traffic routing</strong>: send 10% of production traffic to the staging slot.</li>
+              <li>Monitor both slots, then perform a full <strong>swap</strong> when confident.</li>
+              <li>Explain: How does this differ from a canary deployment?</li>
+            </ol>
+            <div class="hint">
+              <strong>Show Hint</strong>
+              <div class="hint-text"><strong>Blue-green</strong> swaps 100% of traffic at once between two identical environments. <strong>Canary</strong> gradually increases the traffic percentage to the new version (e.g., 10% &rarr; 25% &rarr; 50% &rarr; 100%). App Service supports both via the <strong>Traffic %</strong> setting on the Deployment slots blade.</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================== PROVE IT TAB ==================== -->
+        <div id="tab-prove" class="tab-content">
+          <div class="prove-intro">
+            <h2>Prove You Know It</h2>
+            <p>Not memorization — understanding. Can you apply what you learned to real situations?</p>
+            <div class="score-display">Scenarios: <span class="quiz-score">No questions answered yet</span></div>
+          </div>
+
+          <div class="assess-section">
+            <div class="assess-section-title"><span class="assess-icon scenario">?</span> Quick Scenarios</div>
+
+            <div class="quiz-card" data-qid="q1" data-answer="B">
+              <div class="quiz-scenario">
+                <span class="scenario-label">Scenario</span>
+                <p>You deployed a new version of your web app to the staging slot and it's working perfectly. You swap to production. Five minutes later, users report errors. What's the fastest way to recover?</p>
+              </div>
+              <div class="quiz-options">
+                <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>Redeploy the old version from Git</span></div>
+                <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>Swap the slots again &mdash; the old version is still in the staging slot</span></div>
+                <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>Delete the production slot and recreate it</span></div>
+              </div>
+              <div class="quiz-explanation">
+                <div class="explanation-box why-right"><strong>Why this is correct</strong>Slot swaps are reversible. After swapping, the old production code is now in the staging slot. Simply swap again to roll back instantly. This is the whole point of deployment slots &mdash; zero-downtime deployments with instant rollback.</div>
+                <div class="explanation-box why-wrong"><strong>Common mistakes</strong>Redeploying from Git takes minutes; re-swapping takes seconds. Deleting a production slot is destructive and unnecessary when you can simply swap back.</div>
+              </div>
+            </div>
+
+            <div class="quiz-card" data-qid="q2" data-answer="C">
+              <div class="quiz-scenario">
+                <span class="scenario-label">Scenario</span>
+                <p>You need to run a batch processing job that takes 10 minutes, runs once daily, and processes files from Blob Storage. Which compute option is most cost-effective?</p>
+              </div>
+              <div class="quiz-options">
+                <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>An App Service Web App on a Basic plan running 24/7</span></div>
+                <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>A Virtual Machine Scale Set with autoscale</span></div>
+                <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>Azure Container Instances triggered by a Logic App or timer</span></div>
+              </div>
+              <div class="quiz-explanation">
+                <div class="explanation-box why-right"><strong>Why this is correct</strong>ACI charges only while the container runs &mdash; 10 minutes per day. ACI is purpose-built for short-lived, event-driven workloads.</div>
+                <div class="explanation-box why-wrong"><strong>Common mistakes</strong>App Service charges 24/7 even when idle. VMSS is massive overkill for a single batch job.</div>
+              </div>
+            </div>
+
+            <div class="quiz-card" data-qid="q3" data-answer="A">
+              <div class="quiz-scenario">
+                <span class="scenario-label">Scenario</span>
+                <p>Your Container App is running but you need to deploy a new version without downtime. What feature supports this?</p>
+              </div>
+              <div class="quiz-options">
+                <div class="quiz-option" data-value="A"><span class="option-letter">A</span><span>Container Apps supports revision-based deployments with traffic splitting</span></div>
+                <div class="quiz-option" data-value="B"><span class="option-letter">B</span><span>You must stop the app, update the image, and restart</span></div>
+                <div class="quiz-option" data-value="C"><span class="option-letter">C</span><span>Container Apps doesn't support zero-downtime deployments</span></div>
+              </div>
+              <div class="quiz-explanation">
+                <div class="explanation-box why-right"><strong>Why this is correct</strong>Container Apps creates a new revision for each deployment. You can split traffic (e.g., 90/10) between the old and new revisions, validate, then shift 100% to the new revision. This is similar to App Service deployment slots but built into the container platform.</div>
+                <div class="explanation-box why-wrong"><strong>Common mistakes</strong>Container Apps absolutely supports zero-downtime deployments. Stopping the app to update is unnecessary and causes downtime.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="assess-section">
+            <div class="assess-section-title"><span class="assess-icon troubleshoot">!</span> Troubleshooting Spot</div>
+
+            <div class="trouble-card">
+              <span class="trouble-label">Troubleshoot</span>
+              <p class="trouble-situation">You deployed a web app from an External Git repo (GitHub). The deployment shows "Success" in the Deployment Center, but browsing to the URL still shows the default Azure placeholder page.</p>
+              <p class="trouble-question">What's wrong?</p>
+              <div class="progressive-hints">
+                <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Hint 1</div><div class="prog-hint-content">Check if the deployment actually pulled the latest code. Click on the deployment entry to see the commit hash and logs.</div></div>
+                <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Hint 2</div><div class="prog-hint-content">The deployment might have succeeded but the app isn't configured for the correct startup. Check the runtime stack &mdash; is it set to match your app (e.g., PHP, Node, Python)?</div></div>
+                <div class="prog-hint"><div class="prog-hint-label"><span class="arrow">&#9654;</span> Answer</div><div class="prog-hint-content answer">Most common cause: the repository branch is wrong. Check that the branch name matches exactly (e.g., "main" vs "master"). Also verify the app's startup command is correct for your runtime. For PHP apps, ensure the document root points to the correct folder. Check Application Logs under "Diagnose and solve problems" for specific errors.</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="assess-section">
+            <div class="assess-section-title"><span class="assess-icon architect">&#9670;</span> Architect's Corner</div>
+
+            <div class="architect-card" data-aid="a1" data-best="B">
+              <span class="architect-label">Design Decision</span>
+              <p class="architect-situation">Your team is migrating 3 microservices to Azure. Service A is a REST API, Service B processes background queues, Service C is a simple static website. Each has different scaling needs. What do you use?</p>
+              <div class="architect-options">
+                <div class="arch-option" data-value="A"><div class="arch-option-title">Option A: Deploy all three as App Service Web Apps in one App Service Plan</div><div class="arch-option-desc">Shared plan, simple management, all scale together</div></div>
+                <div class="arch-option" data-value="B"><div class="arch-option-title">Option B: Service A and B on Container Apps (separate scaling), Service C on Static Web Apps</div><div class="arch-option-desc">Per-service scaling, right tool for each workload</div></div>
+                <div class="arch-option" data-value="C"><div class="arch-option-title">Option C: Deploy all three on AKS (Kubernetes)</div><div class="arch-option-desc">Full control, complex to manage</div></div>
+              </div>
+              <div class="architect-reveal"><strong>Why this is the best choice</strong>Container Apps gives Service A and B independent scaling without Kubernetes complexity &mdash; A scales on HTTP requests, B scales on queue length. Static Web Apps is free/cheap and purpose-built for Service C with built-in CDN. Option A forces all services to scale together (wasteful) and a static site doesn't need a full app runtime. Option C is powerful but overkill unless you have a dedicated platform team to manage Kubernetes.</div>
+            </div>
+          </div>
+
+          <button class="reset-quiz-btn">&#8635; Reset All Answers</button>
+        </div>
+
+      </div><!-- /tab-container -->
+
+      <nav class="module-nav">
+        <a href="08-vms.html" class="prev">
+          <span class="nav-direction">&larr; Previous Module</span>
+          <span class="nav-title">08: Virtual Machines</span>
+        </a>
+        <a href="10-data-protection.html" class="next">
+          <span class="nav-direction">Next Module &rarr;</span>
+          <span class="nav-title">10: Data Protection</span>
+        </a>
+      </nav>
+
+    </div><!-- /module-content -->
+
+  </div><!-- /module-page -->
+
+  <footer class="site-footer">
+    <p>Built for the AZ-104 Azure Administrator certification. Lab content sourced from <a href="https://microsoftlearning.github.io/AZ-104-MicrosoftAzureAdministrator/" target="_blank">Microsoft Learning</a>.</p>
+  </footer>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

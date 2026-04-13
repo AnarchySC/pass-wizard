@@ -6,12 +6,18 @@
  * Per-exam localStorage keys: `passwizard:<exam-code>`
  * Shape:
  *   {
- *     quiz:   { answered: { [qid]: {correct, skipped, ts} }, sessions: [...] },
- *     course: { completed: [moduleId, ...] },
- *     skillTree: { xp: 0, unlocked: [] }
+ *     _v: 1,
+ *     quiz: {
+ *       track: { [qid]: { seen, correct, wrong, streak, known, lastSeen } },
+ *       sessions: [ { date, correct, wrong, skipped, pct, mode, domain } ]
+ *     },
+ *     course:   { completed: [moduleId, ...] },
+ *     skillTree:{ xp: 0, unlocked: [] }
  *   }
  *
- * Stable v1 schema. If you change this, bump SCHEMA_VERSION and write a migration.
+ * Schema vocabulary matches the original quiz.html engine so the migration
+ * doesn't change the meaning of any field. Bump SCHEMA_VERSION + write a
+ * migration before changing field semantics.
  */
 
 const PW_SCHEMA_VERSION = 1;
@@ -20,7 +26,7 @@ const PW_KEY_PREFIX = 'passwizard:';
 function pwEmpty() {
   return {
     _v: PW_SCHEMA_VERSION,
-    quiz: { answered: {}, sessions: [] },
+    quiz: { track: {}, sessions: [] },
     course: { completed: [] },
     skillTree: { xp: 0, unlocked: [] },
   };
@@ -52,14 +58,19 @@ function pwSave(examCode, data) {
 
 function pwSummary(examCode) {
   const d = pwLoad(examCode);
-  const answered = Object.values(d.quiz.answered);
-  const correct = answered.filter(a => a.correct).length;
-  const wrong = answered.filter(a => !a.correct && !a.skipped).length;
+  const tracks = Object.values(d.quiz.track || {});
+  let totalCorrect = 0, totalWrong = 0, totalSeen = 0;
+  for (const t of tracks) {
+    totalCorrect += t.correct || 0;
+    totalWrong += t.wrong || 0;
+    totalSeen += t.seen || 0;
+  }
   return {
     examCode,
-    answeredCount: answered.length,
-    correct,
-    wrong,
+    questionsTouched: tracks.length,
+    correct: totalCorrect,
+    wrong: totalWrong,
+    seen: totalSeen,
     courseCompleted: d.course.completed.length,
     sessions: d.quiz.sessions.length,
   };
