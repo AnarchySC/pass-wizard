@@ -65,6 +65,14 @@ python3 -m http.server 8000   # or any static server
 # open http://localhost:8000/
 ```
 
+## Privacy
+
+- **No account, no backend.** Everything runs client-side.
+- **No third-party scripts, no analytics, no tracking pixels.**
+- **No Google Fonts.** The original `quiz.html` design loaded Inter and JetBrains Mono from `fonts.googleapis.com`, which leaks your IP and User-Agent to Google on every page load. We removed that. Fonts are self-hosted (pending — see `DECISIONS.md`) or fall back to system fonts.
+- **Progress is stored in `localStorage`** under keys prefixed `passwizard:<exam-code>`. It never leaves your device. Clearing your browser data clears your progress.
+- **Export/import** your progress as a single JSON via the Progress tab to back it up or move it between devices.
+
 ## License
 
 MIT.

@@ -37,6 +37,26 @@ Format:
 **Alternatives considered:** Cloudflare Workers KV, Supabase free tier.
 **Reversible:** yes — schema is JSON so future sync is a sync layer, not a rewrite.
 
+## 2026-04-13 — No Google Fonts (privacy)
+**Decision:** Removed the `@import` of `fonts.googleapis.com` from `shared.css`. Font stacks fall back to system fonts.
+**Why:** Loading fonts from Google leaks visitor IP + User-Agent on every page load — a privacy regression we don't need. Self-hosted fonts give the same visual result without the third-party call.
+**Alternatives considered:** Keep the Google import; switch to system fonts permanently.
+**Reversible:** yes.
+**Follow-up TODO:** Download Inter and JetBrains Mono `.woff2` files, commit under `css/fonts/`, and add `@font-face` declarations so the intended typography is restored without third-party calls.
+
+## 2026-04-13 — `main` as default branch
+**Decision:** Renamed the initial branch from `master` to `main` and set it as default on GitHub.
+**Why:** GitHub's own default since 2020; matches most of the user's other active repos.
+**Alternatives considered:** Keep `master`.
+**Reversible:** yes.
+
+## 2026-04-13 — Question bank NOT migrated in scaffold commit
+**Decision:** The 497 AZ-104 (and 1293 total) questions from `quiz-data.json` are NOT committed in the scaffold. Only the engine, shell, and metadata.
+**Why:** Two reasons. (1) The questions likely originate from a VCE dump of Microsoft exam content, which is under Microsoft IP. Publishing them in a public GitHub repo under the user's name creates legal exposure that the user should explicitly opt into. (2) Even ignoring IP, 25MB of question data in the scaffold commit makes the initial history bloated. Better to land the engine first, then make a deliberate call on question bank handling.
+**Alternatives considered:** Commit the full AZ-104 bank now; commit obfuscated; keep private.
+**Reversible:** yes — adding the data later is trivial. Removing it from git history once public is not.
+**Status:** BLOCKS step 3 (engine extraction end-to-end test). User must decide on one of: (a) make repo private, (b) put question data under `.gitignore` and load from a local file path for dev only, (c) rewrite/paraphrase the questions to avoid direct copying, (d) ship without practice quiz content and link to the local file instead.
+
 ## 2026-04-13 — Per-exam quiz-data split
 **Decision:** Split the 48MB `quiz-data.json` into `exams/<code>/quiz-data.json` (one file per exam). Never commit the full bundle.
 **Why:** Loading 24.8MB for AZ-104 is already painful; loading the full 48MB to answer one question is absurd. Per-exam split means only the selected exam pays the cost.

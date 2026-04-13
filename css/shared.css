@@ -1,7 +1,11 @@
 /* Pass Wizard — shared tokens and base layout.
-   Lifted and consolidated from the original quiz.html design system. */
+   Lifted and consolidated from the original quiz.html design system.
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+   Privacy note: the original quiz.html @imported Google Fonts (Inter, JetBrains Mono),
+   which leaks visitor IP + UA to Google on every page load. We deliberately do NOT
+   load Google Fonts here. The font-family stacks below fall back to system fonts.
+   TODO: self-host Inter + JetBrains Mono woff2 files under /css/fonts/ and add
+   @font-face declarations, see DECISIONS.md 2026-04-13 entry. */
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -33,9 +37,9 @@
   --selected-bg: rgba(59, 130, 246, 0.08);
   --selected-border: rgba(59, 130, 246, 0.4);
 
-  /* Type */
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  /* Type — system fallbacks only until fonts are self-hosted */
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, Menlo, Monaco, Consolas, monospace;
 
   /* Spacing / radius */
   --radius-sm: 6px;

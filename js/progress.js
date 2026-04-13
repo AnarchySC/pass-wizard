@@ -1,5 +1,8 @@
 /* Pass Wizard — unified progress store.
  *
+ * Privacy: this data never leaves the user's device. No network calls, no
+ * telemetry, no analytics. Clearing browser data clears progress.
+ *
  * Per-exam localStorage keys: `passwizard:<exam-code>`
  * Shape:
  *   {
