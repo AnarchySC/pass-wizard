@@ -13,7 +13,7 @@ const EXAMS = [
     name: 'Azure Administrator',
     slug: 'az-104',
     questionCount: 497,
-    tabs: { course: true, quiz: true, skillTree: true, companion: false },
+    tabs: { course: true, quiz: true, skillTree: true, companion: true },
   },
   {
     code: 'AZ-400',

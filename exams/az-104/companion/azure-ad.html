@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pass Wizard — Azure AD Study Companion</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%233b82f6'/><text x='50' y='68' font-size='50' text-anchor='middle' fill='white' font-weight='bold'>P</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #e2e8f0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #34d399 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.1em;
+        }
+
+        .progress-container {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            height: 30px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .progress-fill {
+            background: linear-gradient(135deg, #34d399 0%, #3b82f6 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            color: #94a3b8;
+            font-size: 0.95em;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quest-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quest-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(52, 211, 153, 0.5), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .quest-card:hover::before {
+            opacity: 1;
+        }
+
+        .quest-card.completed {
+            background: linear-gradient(135deg, rgba(52, 211, 153, 0.08) 0%, rgba(59, 130, 246, 0.05) 100%);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+        }
+
+        .quest-card.completed::after {
+            content: '✓';
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #34d399 0%, #3b82f6 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .quest-card.locked {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .quest-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .quest-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .quest-number {
+            background: linear-gradient(135deg, #34d399 0%, #3b82f6 100%);
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.3em;
+        }
+
+        .quest-name {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .xp-badge {
+            background: rgba(234, 179, 8, 0.2);
+            border: 1px solid rgba(234, 179, 8, 0.3);
+            color: #fbbf24;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .quest-section {
+            margin: 25px 0;
+        }
+
+        .section-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #34d399 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quest-intro {
+            color: #94a3b8;
+            line-height: 1.7;
+            margin: 15px 0;
+        }
+
+        .hint-box {
+            background: rgba(59, 130, 246, 0.08);
+            border-left: 3px solid #3b82f6;
+            padding: 18px;
+            margin: 15px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .hint-box:hover {
+            background: rgba(59, 130, 246, 0.12);
+            transform: translateX(5px);
+        }
+
+        .hint-title {
+            font-weight: 600;
+            color: #3b82f6;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hint-title::after {
+            content: '▶';
+            font-size: 0.7em;
+            transition: transform 0.3s ease;
+        }
+
+        .hint-box.expanded .hint-title::after {
+            transform: rotate(90deg);
+        }
+
+        .hint-content {
+            color: #cbd5e1;
+            line-height: 1.7;
+            display: none;
+            margin-top: 10px;
+        }
+
+        .hint-box.expanded .hint-content {
+            display: block;
+        }
+
+        .warning-box {
+            background: rgba(234, 179, 8, 0.08);
+            border-left: 3px solid #eab308;
+            padding: 18px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+
+        .warning-title {
+            font-weight: 600;
+            color: #fbbf24;
+            margin-bottom: 8px;
+        }
+
+        .warning-content {
+            color: #cbd5e1;
+            line-height: 1.7;
+        }
+
+        .tip-box {
+            background: rgba(52, 211, 153, 0.08);
+            border-left: 3px solid #34d399;
+            padding: 18px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+
+        .tip-title {
+            font-weight: 600;
+            color: #34d399;
+            margin-bottom: 8px;
+        }
+
+        .tip-content {
+            color: #cbd5e1;
+            line-height: 1.7;
+        }
+
+        .steps-list {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+        }
+
+        .steps-list li {
+            padding: 15px 15px 15px 50px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            border-left: 2px solid rgba(52, 211, 153, 0.3);
+            position: relative;
+            color: #cbd5e1;
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        .steps-list li:hover {
+            background: rgba(52, 211, 153, 0.05);
+            border-color: rgba(52, 211, 153, 0.5);
+        }
+
+        .steps-list li::before {
+            content: attr(data-step);
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #34d399 0%, #3b82f6 100%);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        .checkpoint-section {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .checkpoint {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkpoint:hover {
+            border-color: rgba(52, 211, 153, 0.3);
+            background: rgba(52, 211, 153, 0.05);
+        }
+
+        .checkpoint.checked {
+            background: rgba(52, 211, 153, 0.1);
+            border-color: rgba(52, 211, 153, 0.4);
+        }
+
+        .checkpoint input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: #34d399;
+        }
+
+        .checkpoint-label {
+            flex: 1;
+            cursor: pointer;
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+
+        .complete-btn {
+            background: linear-gradient(135deg, #34d399 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            padding: 16px 30px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 25px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .complete-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(52, 211, 153, 0.3);
+        }
+
+        .complete-btn:disabled {
+            background: rgba(255, 255, 255, 0.05);
+            cursor: not-allowed;
+            transform: none;
+            color: #64748b;
+        }
+
+        .knowledge-check {
+            background: rgba(139, 92, 246, 0.08);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .quiz-question {
+            color: #e2e8f0;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.05em;
+        }
+
+        .quiz-options {
+            list-style: none;
+            padding: 0;
+        }
+
+        .quiz-option {
+            padding: 14px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #cbd5e1;
+        }
+
+        .quiz-option:hover {
+            border-color: rgba(139, 92, 246, 0.5);
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .quiz-option.correct {
+            border-color: rgba(52, 211, 153, 0.6);
+            background: rgba(52, 211, 153, 0.15);
+            color: #34d399;
+        }
+
+        .quiz-option.incorrect {
+            border-color: rgba(239, 68, 68, 0.6);
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+        }
+
+        .resource-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .resource-title {
+            font-weight: 600;
+            color: #34d399;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .resource-link {
+            display: block;
+            color: #3b82f6;
+            text-decoration: none;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            background: rgba(59, 130, 246, 0.05);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .resource-link:hover {
+            background: rgba(59, 130, 246, 0.12);
+            padding-left: 20px;
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .congrats-box {
+            background: linear-gradient(135deg, rgba(52, 211, 153, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%);
+            border: 2px solid rgba(52, 211, 153, 0.4);
+            color: #e2e8f0;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .congrats-box h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #34d399 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .congrats-message {
+            font-size: 1.2em;
+            color: #cbd5e1;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <div style="background:#0a0e1a;border-bottom:1px solid #1e293b;padding:10px 24px;font-size:0.85rem;font-family:system-ui,-apple-system,sans-serif;position:sticky;top:0;z-index:500;"><a href="../index.html#companion" style="color:#64748b;text-decoration:none;">&larr; Back to Pass Wizard AZ-104 hub</a></div>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Azure AD Study Companion</h1>
+            <p class="subtitle">Your guided journey through Azure Active Directory mastery</p>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+            <div class="stats-row">
+                <div class="stat-item">
+                    <span>📋</span>
+                    <span id="questCounter">0/5 quests completed</span>
+                </div>
+                <div class="stat-item">
+                    <span>⚡</span>
+                    <span id="xpCounter">0/100 XP earned</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Before You Start Guide -->
+        <div class="quest-card" style="border: 2px solid rgba(234, 179, 8, 0.5); background: linear-gradient(135deg, rgba(234, 179, 8, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);">
+            <div class="quest-header" style="border-bottom-color: rgba(234, 179, 8, 0.3);">
+                <div class="quest-title">
+                    <div class="quest-number" style="background: linear-gradient(135deg, #eab308 0%, #f59e0b 100%);">⚡</div>
+                    <div class="quest-name">Before You Start: Get Your Azure Environment Ready</div>
+                </div>
+                <div class="xp-badge">Setup Guide</div>
+            </div>
+
+            <div class="quest-section">
+                <div class="section-title">🎯 Why This Matters</div>
+                <p class="quest-intro">To get the FULL hands-on experience with this companion, you'll want access to Azure AD Premium P2 features. The good news? Microsoft offers a FREE 30-day trial with 100 user licenses - perfect for learning!</p>
+            </div>
+
+            <div class="tip-box">
+                <div class="tip-title">💎 What You'll Unlock with P2 Trial</div>
+                <div class="tip-content">
+                    • <strong>Self-Service Password Reset (SSPR)</strong> - Actually configure it, not just read about it<br>
+                    • <strong>Conditional Access</strong> - Create real policies based on location, device, risk<br>
+                    • <strong>Dynamic Groups</strong> - Build rule-based automatic group membership<br>
+                    • <strong>Privileged Identity Management (PIM)</strong> - Time-based admin access<br>
+                    • <strong>Identity Protection</strong> - Risk detection and automated responses<br><br>
+                    Without P2, you can only VIEW these features. With P2, you can BUILD with them! 🚀
+                </div>
+            </div>
+
+            <div class="quest-section">
+                <div class="section-title">📋 Setup Steps (15 minutes)</div>
+                <ul class="steps-list">
+                    <li data-step="1"><strong>Create Free Azure Account</strong><br>
+                    Go to <a href="https://azure.microsoft.com/free" target="_blank" style="color: #3b82f6;">azure.microsoft.com/free</a> → Sign up with your personal email → You'll get $200 credit (30 days) PLUS 12 months of free services</li>
+                    
+                    <li data-step="2"><strong>Verify Your Account</strong><br>
+                    Microsoft will ask for a phone number and credit card (for verification only - you won't be charged during the trial)</li>
+                    
+                    <li data-step="3"><strong>Access Azure Portal</strong><br>
+                    Once verified, go to <a href="https://portal.azure.com" target="_blank" style="color: #3b82f6;">portal.azure.com</a> and sign in</li>
+                    
+                    <li data-step="4"><strong>Navigate to Azure Active Directory</strong><br>
+                    Search for "Azure Active Directory" in the top search bar → Click to open</li>
+                    
+                    <li data-step="5"><strong>Activate P2 Trial</strong><br>
+                    In Azure AD, click "Licenses" in the left menu → Click "All products" → Click "Try/Buy" → Find "Microsoft Entra ID P2" → Click "Activate" on the Free Trial</li>
+                    
+                    <li data-step="6"><strong>Assign License to Yourself</strong><br>
+                    Go to Azure AD → "Users" → Click on your user → Click "Licenses" → Click "+ Assignments" → Select "Microsoft Entra ID P2" → Click "Save"</li>
+                </ul>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-title">⚠️ Important Trial Info</div>
+                <div class="warning-content">
+                    • Trial lasts <strong>30 days</strong> from activation<br>
+                    • You get <strong>100 licenses</strong> (way more than you need!)<br>
+                    • No automatic charges - premium features just stop working after 30 days<br>
+                    • Your free tier features and $200 credit are separate and stay active<br>
+                    • Plan to spend your 30 days wisely - focus on identity/security topics first!
+                </div>
+            </div>
+
+            <div class="hint-box">
+                <div class="hint-title">💡 Can I Skip the P2 Trial?</div>
+                <div class="hint-content">
+                    Yes! You can still learn from this companion without P2. The guide explains what each feature DOES and WHY it matters. However, you'll only be able to VIEW settings instead of actually configuring them.<br><br>
+                    
+                    <strong>With Free Tier Only:</strong><br>
+                    • Quest 1 (Create Users/Groups): ✅ Full hands-on<br>
+                    • Quest 2 (Guest Access): ✅ Full hands-on<br>
+                    • Quest 3 (SSPR): ⚠️ Conceptual learning only<br>
+                    • Quest 4 (MFA): ⚠️ Security Defaults only (no Conditional Access)<br>
+                    • Quest 5 (Dynamic Groups): ⚠️ Conceptual learning only<br><br>
+                    
+                    <strong>With P2 Trial:</strong><br>
+                    All quests: ✅ Full hands-on experience!<br><br>
+                    
+                    For AZ-104 exam prep, understanding the concepts is sufficient. But hands-on is always better! 💪
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <div class="tip-title">🎓 Study Timeline Suggestion</div>
+                <div class="tip-content">
+                    If you activate the P2 trial, here's how to maximize your 30 days:<br><br>
+                    <strong>Week 1: Identity & Access (this companion!)</strong><br>
+                    • Azure AD fundamentals<br>
+                    • RBAC<br>
+                    • Conditional Access<br><br>
+                    
+                    <strong>Week 2: Governance</strong><br>
+                    • Management Groups<br>
+                    • Azure Policy<br>
+                    • Cost Management<br><br>
+                    
+                    <strong>Weeks 3-4: Infrastructure</strong><br>
+                    • Storage Accounts<br>
+                    • Virtual Machines<br>
+                    • Virtual Networks<br>
+                    • (Use your $200 credit for these!)<br><br>
+                    
+                    This way you use P2 for identity features early, then practice infrastructure topics that don't need premium licenses.
+                </div>
+            </div>
+
+            <div class="checkpoint-section">
+                <div class="section-title">✅ Setup Checklist</div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="setup-1">
+                    <label class="checkpoint-label" for="setup-1">Created free Azure account</label>
+                </div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="setup-2">
+                    <label class="checkpoint-label" for="setup-2">Can access portal.azure.com</label>
+                </div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="setup-3">
+                    <label class="checkpoint-label" for="setup-3">Activated Microsoft Entra ID P2 trial (optional but recommended)</label>
+                </div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="setup-4">
+                    <label class="checkpoint-label" for="setup-4">Assigned P2 license to my user account (if activated trial)</label>
+                </div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="setup-5">
+                    <label class="checkpoint-label" for="setup-5">Ready to start Quest 1!</label>
+                </div>
+            </div>
+
+            <div class="resource-box">
+                <div class="resource-title">🔗 Helpful Links</div>
+                <a href="https://azure.microsoft.com/free" class="resource-link" target="_blank">→ Sign up for Free Azure Account</a>
+                <a href="https://portal.azure.com" class="resource-link" target="_blank">→ Azure Portal</a>
+                <a href="https://learn.microsoft.com/en-us/entra/fundamentals/get-started-premium" class="resource-link" target="_blank">→ Microsoft Docs: Get Started with Entra ID Premium</a>
+            </div>
+        </div>
+
+        <!-- Quest 1: Create Users and Groups -->
+        <div class="quest-card" data-quest="1" data-xp="20">
+            <div class="quest-header">
+                <div class="quest-title">
+                    <div class="quest-number">1</div>
+                    <div class="quest-name">Create Users and Groups in Azure AD</div>
+                </div>
+                <div class="xp-badge">+20 XP</div>
+            </div>
+
+            <div class="quest-section">
+                <div class="section-title">🎯 What You'll Learn</div>
+                <p class="quest-intro">In this quest, you'll learn how to create and manage users and groups in Azure AD. This is the foundation of identity management in Azure!</p>
+            </div>
+
+            <div class="hint-box">
+                <div class="hint-title">💡 Where to Start</div>
+                <div class="hint-content">
+                    Navigate to the Azure Portal (portal.azure.com) → Search for "Azure Active Directory" in the top search bar → Click on it to open the Azure AD blade.
+                </div>
+            </div>
+
+            <div class="quest-section">
+                <div class="section-title">📋 Step-by-Step Guide</div>
+                <ul class="steps-list">
+                    <li data-step="1">In Azure AD, click on "Users" in the left menu</li>
+                    <li data-step="2">Click "+ New user" → Choose "Create new user"</li>
+                    <li data-step="3">Fill in User Principal Name and Display Name (e.g., john.doe@yourdomain.onmicrosoft.com)</li>
+                    <li data-step="4">Set a temporary password (or use auto-generate)</li>
+                    <li data-step="5">Click "Create" - congrats, you created your first user! 🎉</li>
+                </ul>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-title">⚠️ Free Tier Note</div>
+                <div class="warning-content">Your free Azure account gives you Azure AD Free tier. This is perfect for learning the basics! Some advanced features (like dynamic groups) require Azure AD P1, but don't worry - you'll learn about those in the "Understand & Explain" section.</div>
+            </div>
+
+            <div class="hint-box">
+                <div class="hint-title">💡 Now Try Groups</div>
+                <div class="hint-content">
+                    <strong>Creating a Security Group:</strong><br><br>
+                    1. Go back to Azure AD → Click "Groups"<br>
+                    2. Click "+ New group"<br>
+                    3. Choose Group type: "Security"<br>
+                    4. Enter a name like "IT-Admins"<br>
+                    5. Membership type: "Assigned" (Dynamic requires P1)<br>
+                    6. Click "Create"<br><br>
+                    <strong>Add your user to the group:</strong><br><br>
+                    1. Click on your new group<br>
+                    2. Click "Members" → "+ Add members"<br>
+                    3. Select the user you created<br>
+                    4. Click "Select"
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <div class="tip-title">💪 Pro Tip</div>
+                <div class="tip-content">Try creating 2-3 users and organizing them into different groups (like "Marketing", "Engineering", "Finance"). This mimics real-world scenarios and helps you understand group-based management!</div>
+            </div>
+
+            <div class="checkpoint-section">
+                <div class="section-title">✅ Completion Checklist</div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="check1-1">
+                    <label class="checkpoint-label" for="check1-1">Created at least one user in Azure AD</label>
+                </div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="check1-2">
+                    <label class="checkpoint-label" for="check1-2">Created a Security group</label>
+                </div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="check1-3">
+                    <label class="checkpoint-label" for="check1-3">Added a user to the group</label>
+                </div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="check1-4">
+                    <label class="checkpoint-label" for="check1-4">Explored the difference between Security and Microsoft 365 groups</label>
+                </div>
+            </div>
+
+            <button class="complete-btn" onclick="completeQuest(1)">Mark Quest Complete</button>
+        </div>
+
+        <!-- Quest 2: Configure Guest User Access -->
+        <div class="quest-card locked" data-quest="2" data-xp="20">
+            <div class="quest-header">
+                <div class="quest-title">
+                    <div class="quest-number">2</div>
+                    <div class="quest-name">Configure Guest User Access</div>
+                </div>
+                <div class="xp-badge">+20 XP</div>
+            </div>
+
+            <div class="quest-section">
+                <div class="section-title">🎯 What You'll Learn</div>
+                <p class="quest-intro">Guest users let you collaborate with external partners while keeping your tenant secure. This is called B2B (Business-to-Business) collaboration!</p>
+            </div>
+
+            <div class="hint-box">
+                <div class="hint-title">💡 Understanding Guest vs Member Users</div>
+                <div class="hint-content">
+                    <strong>Member Users:</strong> Internal employees with full access to your Azure AD<br><br>
+                    <strong>Guest Users:</strong> External collaborators with limited access by default<br><br>
+                    Think of it like: Members have keys to all the rooms, Guests only get keys to the meeting rooms!
+                </div>
+            </div>
+
+            <div class="quest-section">
+                <div class="section-title">📋 Step-by-Step Guide</div>
+                <ul class="steps-list">
+                    <li data-step="1">Go to Azure AD → "Users"</li>
+                    <li data-step="2">Click "+ New user" → Choose "Invite external user"</li>
+                    <li data-step="3">Enter an email address (can be any personal email like Gmail)</li>
+                    <li data-step="4">Add a personal message (optional but nice!)</li>
+                    <li data-step="5">Click "Invite" - the guest will receive an email invitation</li>
+                </ul>
+            </div>
+
+            <div class="tip-box">
+                <div class="tip-title">🧪 Testing Tip</div>
+                <div class="tip-content">Use your personal email address as the guest! This lets you see both sides of the experience - as the admin and as the guest user. Check your personal email for the invitation!</div>
+            </div>
+
+            <div class="hint-box">
+                <div class="hint-title">💡 Guest Settings Configuration</div>
+                <div class="hint-content">
+                    <strong>Explore External Collaboration Settings:</strong><br><br>
+                    1. Azure AD → "External Identities"<br>
+                    2. Click "External collaboration settings"<br>
+                    3. Notice the different permission levels for guests<br>
+                    4. See who can invite guests (important for security!)<br><br>
+                    Don't change anything yet - just observe what options are available!
+                </div>
+            </div>
+
+            <div class="knowledge-check">
+                <div class="quiz-question">🧠 Knowledge Check: What user type designation does an invited external collaborator get?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, false)">A) External</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, true)">B) Guest</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, false)">C) Partner</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, false)">D) Visitor</div>
+                </div>
+            </div>
+
+            <div class="checkpoint-section">
+                <div class="section-title">✅ Completion Checklist</div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="check2-1">
+                    <label class="checkpoint-label" for="check2-1">Invited a guest user</label>
+                </div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="check2-2">
+                    <label class="checkpoint-label" for="check2-2">Reviewed external collaboration settings</label>
+                </div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="check2-3">
+                    <label class="checkpoint-label" for="check2-3">Understand difference between Guest and Member users</label>
+                </div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="check2-4">
+                    <label class="checkpoint-label" for="check2-4">Tested guest invitation flow</label>
+                </div>
+            </div>
+
+            <button class="complete-btn" onclick="completeQuest(2)" disabled>Mark Quest Complete</button>
+        </div>
+
+        <!-- Quest 3: Self-Service Password Reset -->
+        <div class="quest-card locked" data-quest="3" data-xp="20">
+            <div class="quest-header">
+                <div class="quest-title">
+                    <div class="quest-number">3</div>
+                    <div class="quest-name">Set Up Self-Service Password Reset (SSPR)</div>
+                </div>
+                <div class="xp-badge">+20 XP</div>
+            </div>
+
+            <div class="quest-section">
+                <div class="section-title">🎯 What You'll Learn</div>
+                <p class="quest-intro">SSPR lets users reset their own passwords without calling IT. This saves time and empowers users!</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-title">⚠️ Free Tier Limitation</div>
+                <div class="warning-content">SSPR is a Premium P1 feature. With the free tier, you can EXPLORE the settings but can't fully enable it. That's okay - understanding the configuration is what matters for the exam!</div>
+            </div>
+
+            <div class="quest-section">
+                <div class="section-title">📋 Exploration Guide</div>
+                <ul class="steps-list">
+                    <li data-step="1">Azure AD → Search for "Password reset" in left menu</li>
+                    <li data-step="2">Click "Properties" - see that it's disabled (needs Premium)</li>
+                    <li data-step="3">Explore "Authentication methods" - notice multiple verification options</li>
+                    <li data-step="4">Check "Registration" settings - see how users would enroll</li>
+                    <li data-step="5">Review "Notifications" - understand alert options</li>
+                </ul>
+            </div>
+
+            <div class="hint-box">
+                <div class="hint-title">💡 Understanding SSPR Concepts</div>
+                <div class="hint-content">
+                    <strong>Key Concepts to Know:</strong><br><br>
+                    • <strong>Gates:</strong> Number of authentication methods required (usually 1 or 2)<br>
+                    • <strong>Methods:</strong> Mobile app, phone, email, security questions<br>
+                    • <strong>Registration:</strong> Users must register before they can use SSPR<br>
+                    • <strong>Writeback:</strong> Syncs password changes back to on-premises AD (hybrid scenarios)<br><br>
+                    Even if you can't enable it now, understanding these concepts is crucial!
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <div class="tip-title">📚 Exam Focus</div>
+                <div class="tip-content">For AZ-104, know: SSPR requires Azure AD Premium P1 or P2, supports multiple authentication methods, and can integrate with on-premises Active Directory through password writeback.</div>
+            </div>
+
+            <div class="knowledge-check">
+                <div class="quiz-question">🧠 Knowledge Check: What Azure AD license tier is required for SSPR?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, false)">A) Azure AD Free</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, true)">B) Azure AD Premium P1</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, false)">C) Azure AD Premium P2</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, false)">D) Microsoft 365 E3</div>
+                </div>
+            </div>
+
+            <div class="checkpoint-section">
+                <div class="section-title">✅ Completion Checklist</div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="check3-1">
+                    <label class="checkpoint-label" for="check3-1">Located SSPR settings in Azure AD</label>
+                </div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="check3-2">
+                    <label class="checkpoint-label" for="check3-2">Reviewed authentication methods available</label>
+                </div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="check3-3">
+                    <label class="checkpoint-label" for="check3-3">Understand licensing requirements (P1/P2)</label>
+                </div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="check3-4">
+                    <label class="checkpoint-label" for="check3-4">Know the concept of "gates" and authentication methods</label>
+                </div>
+            </div>
+
+            <button class="complete-btn" onclick="completeQuest(3)" disabled>Mark Quest Complete</button>
+        </div>
+
+        <!-- Quest 4: Configure MFA -->
+        <div class="quest-card locked" data-quest="4" data-xp="20">
+            <div class="quest-header">
+                <div class="quest-title">
+                    <div class="quest-number">4</div>
+                    <div class="quest-name">Configure Multi-Factor Authentication (MFA)</div>
+                </div>
+                <div class="xp-badge">+20 XP</div>
+            </div>
+
+            <div class="quest-section">
+                <div class="section-title">🎯 What You'll Learn</div>
+                <p class="quest-intro">MFA adds an extra layer of security by requiring two forms of verification. This is CRITICAL for protecting accounts!</p>
+            </div>
+
+            <div class="tip-box">
+                <div class="tip-title">🎉 Good News!</div>
+                <div class="tip-content">Security defaults include MFA and are available in the free tier! Let's explore them.</div>
+            </div>
+
+            <div class="quest-section">
+                <div class="section-title">📋 Step-by-Step Guide</div>
+                <ul class="steps-list">
+                    <li data-step="1">Azure AD → "Properties" → Scroll to bottom</li>
+                    <li data-step="2">Click "Manage security defaults"</li>
+                    <li data-step="3">Notice it can be Enabled or Disabled</li>
+                    <li data-step="4">If disabled, consider enabling it (protects your account!)</li>
+                    <li data-step="5">Security defaults automatically enable MFA for all users</li>
+                </ul>
+            </div>
+
+            <div class="hint-box">
+                <div class="hint-title">💡 Understanding Security Defaults vs Conditional Access</div>
+                <div class="hint-content">
+                    <strong>Security Defaults (Free):</strong><br>
+                    • Basic MFA for all users<br>
+                    • All-or-nothing approach<br>
+                    • Great for small organizations<br>
+                    • Can't customize when MFA is required<br><br>
+                    
+                    <strong>Conditional Access (Premium P1):</strong><br>
+                    • Granular control over MFA policies<br>
+                    • Can require MFA based on location, device, risk level<br>
+                    • Can exclude specific users or groups<br>
+                    • Way more flexible!<br><br>
+                    
+                    Think: Security Defaults = light switch (on/off), Conditional Access = smart home (total control)
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-title">⚠️ Important</div>
+                <div class="warning-content">If you enable security defaults, you'll need to set up MFA on your own account next time you sign in. Have your phone ready with the Microsoft Authenticator app!</div>
+            </div>
+
+            <div class="hint-box">
+                <div class="hint-title">💡 Advanced: Exploring Conditional Access (View Only)</div>
+                <div class="hint-content">
+                    Even though you can't create Conditional Access policies with the free tier, you can still explore the interface:<br><br>
+                    1. Azure AD → Search for "Conditional Access"<br>
+                    2. Click "Policies" - see the interface<br>
+                    3. Notice the structure: Assignments (who/what) → Conditions (when) → Access controls (what happens)<br>
+                    4. This is the "pro version" of MFA control you'll use in enterprise environments!
+                </div>
+            </div>
+
+            <div class="knowledge-check">
+                <div class="quiz-question">🧠 Knowledge Check: What's the main difference between Security Defaults and Conditional Access?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, false)">A) Security Defaults is more secure</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, true)">B) Conditional Access offers granular policy control</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, false)">C) They're the same thing</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, false)">D) Security Defaults requires Premium P2</div>
+                </div>
+            </div>
+
+            <div class="checkpoint-section">
+                <div class="section-title">✅ Completion Checklist</div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="check4-1">
+                    <label class="checkpoint-label" for="check4-1">Located Security Defaults settings</label>
+                </div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="check4-2">
+                    <label class="checkpoint-label" for="check4-2">Understand difference between Security Defaults and Conditional Access</label>
+                </div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="check4-3">
+                    <label class="checkpoint-label" for="check4-3">Explored Conditional Access interface (view only)</label>
+                </div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="check4-4">
+                    <label class="checkpoint-label" for="check4-4">Know which tier is required for each (Free vs P1)</label>
+                </div>
+            </div>
+
+            <button class="complete-btn" onclick="completeQuest(4)" disabled>Mark Quest Complete</button>
+        </div>
+
+        <!-- Quest 5: Dynamic Group Membership -->
+        <div class="quest-card locked" data-quest="5" data-xp="20">
+            <div class="quest-header">
+                <div class="quest-title">
+                    <div class="quest-number">5</div>
+                    <div class="quest-name">Understand Dynamic Group Membership</div>
+                </div>
+                <div class="xp-badge">+20 XP</div>
+            </div>
+
+            <div class="quest-section">
+                <div class="section-title">🎯 What You'll Learn</div>
+                <p class="quest-intro">Dynamic groups automatically add/remove members based on user attributes. Super powerful for automation!</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-title">⚠️ Premium Feature Alert</div>
+                <div class="warning-content">Dynamic groups require Azure AD Premium P1. You can't create them with the free tier, BUT you can still learn how they work - which is the key exam knowledge!</div>
+            </div>
+
+            <div class="quest-section">
+                <div class="section-title">📋 Conceptual Learning</div>
+                <ul class="steps-list">
+                    <li data-step="1">Go to Azure AD → "Groups" → Try "+ New group"</li>
+                    <li data-step="2">Notice the "Membership type" dropdown</li>
+                    <li data-step="3">See "Dynamic User" and "Dynamic Device" (greyed out)</li>
+                    <li data-step="4">Click the "Learn more" link to read Microsoft docs</li>
+                    <li data-step="5">Understand: these use rules like "department equals Marketing"</li>
+                </ul>
+            </div>
+
+            <div class="hint-box">
+                <div class="hint-title">💡 How Dynamic Groups Work</div>
+                <div class="hint-content">
+                    <strong>Example Scenarios:</strong><br><br>
+                    
+                    <strong>All Marketing users:</strong><br>
+                    Rule: (user.department -eq "Marketing")<br><br>
+                    
+                    <strong>All users in Chicago:</strong><br>
+                    Rule: (user.city -eq "Chicago")<br><br>
+                    
+                    <strong>Contractors expiring soon:</strong><br>
+                    Rule: (user.employeeType -eq "Contractor") -and (user.accountEnabled -eq true)<br><br>
+                    
+                    The group membership updates automatically as user attributes change!
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <div class="tip-title">💪 Exam Tip</div>
+                <div class="tip-content">Key things to remember: Dynamic groups require Azure AD P1, they use rule-based expressions, membership updates automatically, and there's a processing time (not instant!). Also know: you can have dynamic USER groups and dynamic DEVICE groups.</div>
+            </div>
+
+            <div class="hint-box">
+                <div class="hint-title">💡 Comparison: Assigned vs Dynamic</div>
+                <div class="hint-content">
+                    <strong>Assigned Groups (Free tier):</strong><br>
+                    • Manual membership management<br>
+                    • You add/remove members one by one<br>
+                    • Full control, but time-consuming<br>
+                    • Best for small, static groups<br><br>
+                    
+                    <strong>Dynamic Groups (Premium P1):</strong><br>
+                    • Automatic membership based on rules<br>
+                    • Updates as user attributes change<br>
+                    • Requires P1 license<br>
+                    • Perfect for large, changing organizations<br><br>
+                    
+                    Real-world example: A company has 500 employees. When someone joins the Marketing dept, they're automatically added to "Marketing-Team" group, get access to marketing resources, and receive marketing emails. When they transfer to Sales, they're automatically moved! No admin work needed.
+                </div>
+            </div>
+
+            <div class="knowledge-check">
+                <div class="quiz-question">🧠 Knowledge Check: What Azure AD license is required for dynamic group membership?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, false)">A) Azure AD Free</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, true)">B) Azure AD Premium P1</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, false)">C) Office 365 E3</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, false)">D) It's available in all tiers</div>
+                </div>
+            </div>
+
+            <div class="checkpoint-section">
+                <div class="section-title">✅ Completion Checklist</div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="check5-1">
+                    <label class="checkpoint-label" for="check5-1">Explored dynamic group options in portal</label>
+                </div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="check5-2">
+                    <label class="checkpoint-label" for="check5-2">Understand how dynamic membership rules work</label>
+                </div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="check5-3">
+                    <label class="checkpoint-label" for="check5-3">Know difference between Dynamic User and Dynamic Device</label>
+                </div>
+                <div class="checkpoint">
+                    <input type="checkbox" id="check5-4">
+                    <label class="checkpoint-label" for="check5-4">Memorized licensing requirement (Azure AD P1)</label>
+                </div>
+            </div>
+
+            <button class="complete-btn" onclick="completeQuest(5)" disabled>Mark Quest Complete</button>
+        </div>
+
+        <!-- Completion Celebration -->
+        <div class="congrats-box" id="congratsBox">
+            <h2>🎉 Congratulations! 🎉</h2>
+            <p class="congrats-message">
+                You've mastered Azure AD fundamentals!<br>
+                You earned <strong>100 XP</strong> and unlocked the next skill in your tree!<br><br>
+                Ready to level up? Check out <strong>RBAC (Role-Based Access Control)</strong> next! 🎭
+            </p>
+        </div>
+
+        <!-- Resource Section -->
+        <div class="resource-box">
+            <div class="resource-title">📚 Additional Resources for Azure AD Mastery</div>
+            <a href="https://learn.microsoft.com/training/modules/describe-azure-identity-access-security/" class="resource-link" target="_blank">→ MS Learn: Azure Identity & Security</a>
+            <a href="https://learn.microsoft.com/entra/identity/" class="resource-link" target="_blank">→ Microsoft Entra ID Documentation</a>
+            <a href="https://www.youtube.com/watch?v=Ma7VAQE7ga4" class="resource-link" target="_blank">→ John Savill's Azure AD Deep Dive (Video)</a>
+            <a href="https://learn.microsoft.com/azure/security/fundamentals/identity-management-best-practices" class="resource-link" target="_blank">→ Identity Management Best Practices</a>
+        </div>
+
+    </div>
+
+    <script src="../../../js/progress.js"></script>
+    <script>
+        // Progress bridge: read/write through the shared Pass Wizard store
+        // (passwizard:AZ-104 → data.companion.azureAd) instead of a standalone
+        // key. Keeps all AZ-104 state on one exam-scoped record.
+        const PW_EXAM = 'AZ-104';
+        const PW_GUIDE = 'azureAd';
+
+        function pwCompanionLoad() {
+            const d = pwLoad(PW_EXAM);
+            d.companion = d.companion || { guides: {} };
+            d.companion.guides = d.companion.guides || {};
+            d.companion.guides[PW_GUIDE] = d.companion.guides[PW_GUIDE] || { completed: [], totalXP: 0 };
+            return d;
+        }
+
+        let completedQuests = pwCompanionLoad().companion.guides[PW_GUIDE];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            restoreProgress();
+            setupCheckboxes();
+            setupHints();
+        });
+
+        function setupHints() {
+            document.querySelectorAll('.hint-box').forEach(box => {
+                box.addEventListener('click', function() {
+                    this.classList.toggle('expanded');
+                });
+            });
+        }
+
+        function setupCheckboxes() {
+            document.querySelectorAll('.checkpoint').forEach(checkpoint => {
+                const checkbox = checkpoint.querySelector('input[type="checkbox"]');
+                const label = checkpoint.querySelector('.checkpoint-label');
+                
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        checkpoint.classList.add('checked');
+                    } else {
+                        checkpoint.classList.remove('checked');
+                    }
+                    updateQuestButton(checkpoint.closest('.quest-card'));
+                });
+
+                label.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    checkbox.checked = !checkbox.checked;
+                    checkbox.dispatchEvent(new Event('change'));
+                });
+            });
+        }
+
+        function updateQuestButton(questCard) {
+            const checkboxes = questCard.querySelectorAll('.checkpoint input[type="checkbox"]');
+            const button = questCard.querySelector('.complete-btn');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            button.disabled = !allChecked;
+        }
+
+        function completeQuest(questNumber) {
+            if (completedQuests.completed.includes(questNumber)) {
+                return;
+            }
+
+            const questCard = document.querySelector(`[data-quest="${questNumber}"]`);
+            const xp = parseInt(questCard.dataset.xp);
+            
+            completedQuests.completed.push(questNumber);
+            completedQuests.totalXP += xp;
+            
+            questCard.classList.add('completed');
+            
+            // Unlock next quest
+            const nextQuest = document.querySelector(`[data-quest="${questNumber + 1}"]`);
+            if (nextQuest) {
+                nextQuest.classList.remove('locked');
+                nextQuest.querySelector('.complete-btn').disabled = true;
+            }
+            
+            updateProgress();
+            saveProgress();
+            
+            // Show celebration if all complete
+            if (completedQuests.completed.length === 5) {
+                setTimeout(() => {
+                    document.getElementById('congratsBox').style.display = 'block';
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                }, 500);
+            } else {
+                // Scroll to next quest
+                if (nextQuest) {
+                    setTimeout(() => {
+                        nextQuest.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 300);
+                }
+            }
+        }
+
+        function updateProgress() {
+            const progress = (completedQuests.completed.length / 5) * 100;
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = progress + '%';
+            progressFill.textContent = Math.round(progress) + '%';
+            
+            document.getElementById('questCounter').textContent = `${completedQuests.completed.length}/5 quests completed`;
+            document.getElementById('xpCounter').textContent = `${completedQuests.totalXP}/100 XP earned`;
+        }
+
+        function saveProgress() {
+            const d = pwCompanionLoad();
+            d.companion.guides[PW_GUIDE] = completedQuests;
+            pwSave(PW_EXAM, d);
+        }
+
+        function restoreProgress() {
+            completedQuests.completed.forEach(questNum => {
+                const questCard = document.querySelector(`[data-quest="${questNum}"]`);
+                if (questCard) {
+                    questCard.classList.add('completed');
+                }
+                
+                const nextQuest = document.querySelector(`[data-quest="${questNum + 1}"]`);
+                if (nextQuest) {
+                    nextQuest.classList.remove('locked');
+                }
+            });
+            
+            if (completedQuests.completed.length === 5) {
+                document.getElementById('congratsBox').style.display = 'block';
+            }
+            
+            updateProgress();
+        }
+
+        function checkAnswer(element, isCorrect) {
+            const options = element.parentElement.querySelectorAll('.quiz-option');
+            options.forEach(opt => {
+                opt.style.pointerEvents = 'none';
+            });
+            
+            if (isCorrect) {
+                element.classList.add('correct');
+                setTimeout(() => {
+                    alert('🎉 Correct! You got it!');
+                }, 300);
+            } else {
+                element.classList.add('incorrect');
+                setTimeout(() => {
+                    alert('❌ Not quite! Try again or check the hints.');
+                    options.forEach(opt => {
+                        opt.style.pointerEvents = 'auto';
+                        opt.classList.remove('incorrect');
+                    });
+                }, 300);
+            }
+        }
+    </script>
+</body>
+</html>

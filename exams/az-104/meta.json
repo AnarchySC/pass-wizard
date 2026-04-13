@@ -10,9 +10,17 @@
     "course": true,
     "quiz": true,
     "skillTree": true,
-    "companion": false,
+    "companion": true,
     "progress": true
   },
+  "companionGuides": [
+    { "id": "azureAd", "title": "Azure AD Fundamentals", "icon": "🔐", "status": "available", "questCount": 5, "xp": 100, "file": "companion/azure-ad.html" },
+    { "id": "rbac",              "title": "RBAC",                     "icon": "🎭", "status": "soon" },
+    { "id": "azurePolicy",       "title": "Azure Policy",             "icon": "📜", "status": "soon" },
+    { "id": "managementGroups",  "title": "Management Groups",        "icon": "🏢", "status": "soon" },
+    { "id": "storageAccounts",   "title": "Storage Accounts",         "icon": "💾", "status": "soon" },
+    { "id": "virtualMachines",   "title": "Virtual Machines",         "icon": "🖥️", "status": "soon" }
+  ],
   "courseModules": [
     { "id": "01-identity",       "num": "01", "title": "Administer Identity",                  "file": "course/modules/01-identity.html" },
     { "id": "02-governance",     "num": "02", "title": "Administer Governance & Compliance",   "file": "course/modules/02-governance.html" },

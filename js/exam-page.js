@@ -65,7 +65,7 @@ function renderTabContent() {
     case 'skillTree':
       return renderSkillTree(main);
     case 'companion':
-      return renderComingSoon(main, 'Companion', 'Interactive story-driven walkthroughs — coming soon.');
+      return renderCompanion(main);
     default:
       return renderComingSoon(main, 'Nothing here yet', 'This exam is still being set up.');
   }
@@ -107,6 +107,48 @@ function renderQuiz(main, subPath) {
   }
   // Hand off the container to the quiz engine. It owns rendering from here.
   PWQuiz.mount({ exam: examMeta, container: main });
+}
+
+function renderCompanion(main) {
+  if (!examMeta.tabs.companion) {
+    return renderComingSoon(main, 'Companion', 'No companion guides authored for this exam yet.');
+  }
+  const guides = examMeta.companionGuides || [];
+  if (guides.length === 0) {
+    return renderComingSoon(main, 'Companion', 'No companion guides registered in meta.json.');
+  }
+  const data = pwLoad(examMeta.code);
+  const store = (data.companion && data.companion.guides) || {};
+  const cards = guides.map(g => {
+    if (g.status === 'available') {
+      const p = store[g.id] || { completed: [], totalXP: 0 };
+      const done = p.completed.length;
+      const badge = done === g.questCount
+        ? '<span style="color:var(--correct);font-size:0.7rem;">&#10003; COMPLETE</span>'
+        : `<span style="color:var(--text-dim);font-size:0.7rem;">${done}/${g.questCount} quests · ${p.totalXP}/${g.xp} XP</span>`;
+      return `
+        <a class="exam-btn" href="${g.file}" style="text-align:left;">
+          <span class="code" style="font-size:0.9rem;">${g.icon || '📘'} Guide</span>
+          <span class="name" style="color:var(--text);font-size:1rem;margin-bottom:8px;">${g.title}</span>
+          ${badge}
+        </a>`;
+    }
+    return `
+      <div class="exam-btn" style="text-align:left;opacity:0.4;cursor:not-allowed;">
+        <span class="code" style="font-size:0.9rem;">${g.icon || '🔒'} Guide</span>
+        <span class="name" style="color:var(--text);font-size:1rem;margin-bottom:8px;">${g.title}</span>
+        <span style="color:var(--text-dim);font-size:0.7rem;">Coming soon</span>
+      </div>`;
+  }).join('');
+  main.innerHTML = `
+    <div class="card">
+      <h3>Interactive Walkthroughs</h3>
+      <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:20px;">
+        Step-by-step guided tours with hints, knowledge checks, and XP tracking. Progress persists alongside your other AZ-104 state.
+      </p>
+      <div class="exam-grid" style="max-width:none;">${cards}</div>
+    </div>
+  `;
 }
 
 function renderSkillTree(main) {
